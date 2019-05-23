@@ -12,6 +12,7 @@ using json = nlohmann::json;
 #include "../Adapter/I2CAdapter.h"
 #include "../Adapter/MemoryAdapter.h"
 #include "../Adapter/CMV12000Adapter.h"
+#include "../Adapter/SysfsAdapter.h"
 
 #include <Schema/axiom_daemon_generated.h>
 

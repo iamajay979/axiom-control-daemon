@@ -30,6 +30,7 @@ Daemon::Daemon() :
     //_i2cAdapter = new I2CAdapter();
 
     _modules["image_sensor"] = std::make_shared<CMV12000Adapter>();
+    _modules["zynq_board"] = std::make_shared<SysfsAdapter>();
 
     // TODO (BAndiT1983): Add real reading of revision/version
     //std::string/int?? revision = ReadRevision();
@@ -119,7 +120,7 @@ void Daemon::ProcessClient(int socket)
 
 void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
 {
-    auto req= UnPackDaemonRequest(receivedBuffer);
+    auto req= UnPackDaemonRequest(receivedBuffer);//req is an object that is made from the buffer via UnPackDaemonRequest
 
     std::string moduleName = req.get()->module_;
 
