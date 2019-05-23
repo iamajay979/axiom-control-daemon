@@ -16,9 +16,7 @@ class SysfsAdapter : public IDaemonModule
 {	
 
     bool SetZynqInfo(std::string zynqInfo, std::string, std::string& message);
-	bool GetZynqInfo(std::string& zynqInfo, std::string& message);
-
-
+    bool GetZynqInfo(std::string& zynqInfo, std::string& message);
 public:
 	SysfsAdapter();
 
