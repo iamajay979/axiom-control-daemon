@@ -14,7 +14,8 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/../3rdParty/)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/src/)
 
 FILE(GLOB SOURCE_FILES "*.cpp" "*.h"
-                       "../Adapter/*.cpp" "../Adapter/*.h"
+                       "../Adapters/*.cpp" "../Adapters/*.h"
+                       "../Modules/*.cpp" "../Modules/*.h"
                        "../Log/*.cpp" "../Log/*.h"
                        "../API_WS/MessageHandler.cpp" "../API_WS/MessageHandler.h")
 

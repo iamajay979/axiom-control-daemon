@@ -159,4 +159,7 @@ void MessageHandler::AddDaemonRequest(const std::string& sender, const std::stri
 
     auto req = CreateDaemonRequest(*_builder, &request);
     _settings.push_back(req);
+    _settings.push_back(req);
+    _settings.push_back(req);
+    _settings.push_back(req);
 }

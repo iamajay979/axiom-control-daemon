@@ -1,5 +1,5 @@
-#ifndef CMVADAPTER_H
-#define CMVADAPTER_H
+#ifndef CMVMODULE_H
+#define CMVMODULE_H
 
 #include <memory>
 #include <functional>
@@ -11,7 +11,7 @@
 
 class MemoryAdapter;
 
-class CMV12000Adapter : public IDaemonModule
+class CMV12000Module : public IDaemonModule
 {
     uint32_t address;
     uint32_t memorySize;
@@ -46,9 +46,9 @@ class CMV12000Adapter : public IDaemonModule
     virtual void SetCMVConfigRegister(u_int8_t registerIndex, unsigned int value);
 
 public:
-    CMV12000Adapter();
+    CMV12000Module();
 
-    ~CMV12000Adapter();
+    ~CMV12000Module();
 
     void Execute();
 
@@ -59,4 +59,4 @@ protected:
     void RegisterAvailableMethods();
 };
 
-#endif // CMVADAPTER_H
+#endif // CMVMODULE_H

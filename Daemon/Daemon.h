@@ -9,10 +9,10 @@
 #include "json/json.hpp"
 using json = nlohmann::json;
 
-#include "../Adapter/I2CAdapter.h"
-#include "../Adapter/MemoryAdapter.h"
-#include "../Adapter/CMV12000Adapter.h"
-#include "../Adapter/SysfsAdapter.h"
+#include "../Adapters/I2CAdapter.h"
+#include "../Adapters/MemoryAdapter.h"
+#include "../Modules/CMV12000Module.h"
+#include "../Modules/EnvironmentModule.h"
 
 #include <Schema/axiom_daemon_generated.h>
 

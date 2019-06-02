@@ -29,8 +29,9 @@ Daemon::Daemon() :
     //_memoryAdapter = new MemoryAdapter();
     //_i2cAdapter = new I2CAdapter();
 
-    _modules["image_sensor"] = std::make_shared<CMV12000Adapter>();
-    _modules["zynq_board"] = std::make_shared<SysfsAdapter>();
+    _modules["image_sensor"] = std::make_shared<CMV12000Module>();
+    _modules["temperatures"] = std::make_shared<EnvironmentModule>();
+    _modules["voltages"] = std::make_shared<EnvironmentModule>();
 
     // TODO (BAndiT1983): Add real reading of revision/version
     //std::string/int?? revision = ReadRevision();

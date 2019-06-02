@@ -55,7 +55,8 @@ ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/src/Schema/axiom_daemon_generated.
 ADD_CUSTOM_TARGET( run_schema_generator DEPENDS ${CMAKE_BINARY_DIR}/src/Schema/axiom_daemon_generated.h
     COMMENT "Checking if re-generation is required" )
 
-FILE(GLOB SOURCE_FILES "Adapter/*.cpp" "Adapter/*.h"
+FILE(GLOB SOURCE_FILES "Adapters/*.cpp" "Adapters/*.h"
+    "Modules/*.cpp" "Modules/*.h"
     "Daemon/*.cpp" "Daemon/*.h"
     "Schema/*.fbs"
     "Helpers/*.cpp" "Helpers/*.h"
