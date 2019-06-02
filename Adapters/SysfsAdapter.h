@@ -19,7 +19,7 @@
 class SysfsAdapter : public IAdapter
 {
 public:
-   SysfsAdapter();
+    SysfsAdapter();
 
     void ReadDescriptions(std::string descriptionFile) override
     {
