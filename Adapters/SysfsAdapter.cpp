@@ -59,7 +59,7 @@ void SysfsAdapter::Glob(const std::string filename,std::vector<std::string> &fil
     glob_t glob_result;
     memset(&glob_result, 0, sizeof(glob_result));
 
-	int return_value = glob(filename.c_str(), GLOB_TILDE, NULL, &glob_result);
+    int return_value = glob(filename.c_str(), GLOB_TILDE, NULL, &glob_result);
 
     if(return_value != 0) 
     {
