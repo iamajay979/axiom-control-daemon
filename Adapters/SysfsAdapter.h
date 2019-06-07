@@ -19,9 +19,9 @@
 class SysfsAdapter : public IAdapter
 {
 public:
-    SysfsAdapter();
+	SysfsAdapter();
 
-    void ReadDescriptions(std::string descriptionFile) override
+	void ReadDescriptions(std::string descriptionFile) override
     {
         UNUSED(descriptionFile);
     }
@@ -35,6 +35,10 @@ public:
     void Execute() override;
 
     void ReadFile(std::string filename,std::string &message);
-    void Glob(const std::string filename,std::vector<std::string> &filenames ,std::string &message);
+	void Glob(const std::string filename,std::vector<std::string> &filenames ,std::string &message);
 };
+
+
+
+
 #endif // SYSFSADAPTER_H

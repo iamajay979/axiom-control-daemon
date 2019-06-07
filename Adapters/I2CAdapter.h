@@ -3,7 +3,21 @@
 
 #include <fstream>
 #include <sys/syslog.h>
-
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <limits.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
+#include "smbus.h"
+ 
 // #include <json/json.hpp>
 // using json = nlohmann::json;
 
@@ -36,6 +50,12 @@ public:
     void WriteByte(uint8_t data) override;
     void ReadBlock(uint8_t *data, unsigned int length) override;
     void WriteBlock(uint8_t *data, unsigned int length) override;
+
+    void I2cGet(std::string i2cbusArg, std::string chipAddress,std::string dataAddress, std::string mode, std::string &message);
+    int Openi2cDev(int i2cbusArg, std::string filename, std::string &message);
+    int SetSlaveAddr(int file , int chipAddress);
+
+    // void i2cSet();
 
     void Execute() override;
 
