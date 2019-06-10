@@ -1,7 +1,10 @@
 #ifndef I2CTESTMODULE_H
 #define I2CTESTMODULE_H
 
+#include <vector>
+#include <memory>
 #include "IDaemonModule.h"
+
 
 class I2CAdapter;
 
@@ -18,5 +21,5 @@ public:
 	~I2CTestModule();
 protected:
 	void RegisterAvailableMethods();
-}
+};
 #endif

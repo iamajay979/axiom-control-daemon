@@ -11,9 +11,9 @@ I2CTestModule::I2CTestModule() :
 	RegisterAvailableMethods();
 }
 
-void EnvironmentModule::RegisterAvailableMethods()
+void I2CTestModule::RegisterAvailableMethods()
 {
-	AddParameterHandler("temperature", GETTER_FUNC(&EnvironmentModule::GetZynqTemp), SETTER_FUNC(&EnvironmentModule::SetZynqTemp));
+	AddParameterHandler("temperature", GETTER_FUNC(&I2CTestModule::GetPac1720Info), SETTER_FUNC(&I2CTestModule::SetPac1720Info));
 }
 
 I2CTestModule::~I2CTestModule()
@@ -32,7 +32,7 @@ bool I2CTestModule::GetPac1720Info(std::string &pac1720Info, std::string &messag
 
 	int res;
 	int VV1i,VV2i,VV1f,VV2f,VS1i,VS2i,VS1v,VS2v,count=0;
-	float = VS1f,VS2f,VA1f,VA2f;
+	float VS1f,VS2f,VA1f,VA2f;
 
 	for(auto& it : PACn)
 	{	
@@ -85,10 +85,12 @@ bool I2CTestModule::GetPac1720Info(std::string &pac1720Info, std::string &messag
 		message = (std::to_string(VV1f) + " " +std::to_string(VV1i) + " " + std::to_string(VS1f) + " " + std::to_string(VS1i) + " " + std::to_string(VA1f) + "\n");
 		message += (std::to_string(VV2f) + " " +std::to_string(VV2i) + " " + std::to_string(VS2f) + " " + std::to_string(VS2i) + " " + std::to_string(VA2f));
 	}
+	pac1720Info = message;
+
 	return true;
 }
 
-bool I2CTestModule::SetPac1720Info(std::string pac1720Info, std::string, std::string& message);
+bool I2CTestModule::SetPac1720Info(std::string pac1720Info, std::string, std::string& message)
 {	
 
 	UNUSED(pac1720Info);
