@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
+#include <iomanip>
 #include "smbus.h"
  
 // #include <json/json.hpp>
@@ -51,9 +52,10 @@ public:
     void ReadBlock(uint8_t *data, unsigned int length) override;
     void WriteBlock(uint8_t *data, unsigned int length) override;
 
-    void I2cGet(std::string i2cbusArg, std::string chipAddress,std::string dataAddress, std::string mode, std::string &message);
-    int Openi2cDev(int i2cbusArg, std::string filename, std::string &message);
-    int SetSlaveAddr(int file , int chipAddress);
+    int I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::string dataAddressArg, char mode, std::string &message);
+    int I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::string dataAddressArg, std::string valueArg, char mode , std::string &message);
+    int Openi2cDev(int i2cbusArg, std::string &message);
+    int SetSlaveAddr(int file , int chipAddress ,std::string &message);
 
     // void i2cSet();
 
