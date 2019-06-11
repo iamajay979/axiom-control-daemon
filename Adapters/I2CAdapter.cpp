@@ -87,7 +87,7 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	if(file < 0)
 	{	
-		message = ("Error : Could not open file " + std::string("dev/i2c-") + std::to_string(i2cbus));
+		message = ("Error : Could not open file " + std::string("/dev/i2c-") + std::to_string(i2cbus));
 		return -1;
 	}
 	if (SetSlaveAddr(file, chipAddress, message) < 0)
@@ -211,7 +211,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 	file = Openi2cDev(i2cbus, message);
 	if(file < 0)
 	{	
-		message = ("Error : Could not open file " + std::string("dev/i2c-") + std::to_string(i2cbus));
+		message = ("Error : Could not open file " + std::string("/dev/i2c-") + std::to_string(i2cbus));
 		return -1;
 	}
 
@@ -251,7 +251,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 int I2CAdapter::Openi2cDev(int i2cbus, std::string &message)
 {
 	int file;
-	std::string filename = "dev/i2c-" + std::to_string(i2cbus);
+	std::string filename = "/dev/i2c-" + std::to_string(i2cbus);
 	file = open(filename.c_str() ,O_RDWR);
 	return file;
 	//Add further error handling if required
