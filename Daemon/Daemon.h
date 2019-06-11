@@ -13,7 +13,7 @@ using json = nlohmann::json;
 #include "../Adapters/MemoryAdapter.h"
 #include "../Modules/CMV12000Module.h"
 #include "../Modules/EnvironmentModule.h"
-
+#include "../Modules/I2CTestModule.h"
 #include <Schema/axiom_daemon_generated.h>
 
 class ILogger;

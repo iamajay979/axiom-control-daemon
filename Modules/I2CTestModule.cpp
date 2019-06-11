@@ -13,7 +13,7 @@ I2CTestModule::I2CTestModule() :
 
 void I2CTestModule::RegisterAvailableMethods()
 {
-	AddParameterHandler("temperature", GETTER_FUNC(&I2CTestModule::GetPac1720Info), SETTER_FUNC(&I2CTestModule::SetPac1720Info));
+	AddParameterHandler("pac1720info", GETTER_FUNC(&I2CTestModule::GetPac1720Info), SETTER_FUNC(&I2CTestModule::SetPac1720Info));
 }
 
 I2CTestModule::~I2CTestModule()

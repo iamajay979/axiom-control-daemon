@@ -32,13 +32,13 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 {	
 	//Assumption is that the i2cbus is a valid integer, if names of i2cbus has to incorporated then a proper lookup function has to created similar to system func "i2cget"
 	//Allowed modes : 'b', 'w', 'c'
-	unsigned long i2cbus,chipAddress,dataAddress;
+	long i2cbus,chipAddress,dataAddress;
 	int file, res, size;
-
+	// std::cout<<i2cbusArg<<" "<<chipAddressArg<<" "<<dataAddressArg<<std::endl;
 	//can avoid all these try catch by using int and not string params
 	try
 	{
-		i2cbus = std::stoul(i2cbusArg,nullptr,0);
+		i2cbus = std::stol(i2cbusArg,nullptr,0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -53,7 +53,7 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		chipAddress = std::stoul(chipAddressArg,nullptr,0);
+		chipAddress = std::stol(chipAddressArg,nullptr,0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -67,16 +67,18 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 	}
 
 	try
-	{
-		dataAddress = std::stoul(dataAddressArg,nullptr,0);	
+	{	
+		dataAddress = std::stol(dataAddressArg,nullptr,0);	
 	}
 	catch(const std::invalid_argument& ia)
 	{
 		message = "Invalid argument : " + std::string(ia.what());
 		return -1;
 	}
-	if(dataAddress < 0 || dataAddress > 0xff)
-	{
+	if(dataAddress > 0xff)//handle negative except -1
+	{	
+		// std::cout<<dataAddressArg<<std::endl;
+		// std::cout<<dataAddress<<std::endl;
 		message = "Error : Data Address out of range";
 		return -1;
 	}
@@ -139,12 +141,12 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::string dataAddressArg, std::string valueArg, char mode , std::string &message)
 {
 	//Flags functionality not added as all scripts only use the 'y' flag ,so all functions assume 'y' is set
-	unsigned long i2cbus, chipAddress, dataAddress ,value;
+	long i2cbus, chipAddress, dataAddress ,value;
 	int file, res;
 
 	try
 	{
-		i2cbus = std::stoul(i2cbusArg,nullptr,0);
+		i2cbus = std::stol(i2cbusArg,nullptr,0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -159,7 +161,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		chipAddress = std::stoul(chipAddressArg,nullptr,0);
+		chipAddress = std::stol(chipAddressArg,nullptr,0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -174,7 +176,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		dataAddress = std::stoul(dataAddressArg,nullptr,0);	
+		dataAddress = std::stol(dataAddressArg,nullptr,0);	
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -189,7 +191,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		value = std::stoul(valueArg ,nullptr,0);
+		value = std::stol(valueArg ,nullptr,0);
 	}
 	catch(const std::invalid_argument& ia)
 	{

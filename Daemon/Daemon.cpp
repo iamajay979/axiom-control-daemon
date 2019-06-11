@@ -32,6 +32,7 @@ Daemon::Daemon() :
     _modules["image_sensor"] = std::make_shared<CMV12000Module>();
     _modules["temperatures"] = std::make_shared<EnvironmentModule>();
     _modules["voltages"] = std::make_shared<EnvironmentModule>();
+    _modules["i2c_test"] = std::make_shared<I2CTestModule>();
 
     // TODO (BAndiT1983): Add real reading of revision/version
     //std::string/int?? revision = ReadRevision();
