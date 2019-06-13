@@ -53,8 +53,8 @@ bool I2CTestModule::GetPac1720Info(std::string &pac1720Info, std::string &messag
 		VV1f = VV1i * 20 / 32768;
 		VV2f = VV2i * 20 / 32768;
 
-		VS1i = ((_i2cAdapter->I2cGet("0",ID,"Ox0D",'b',message) << 4) | (_i2cAdapter->I2cGet("0",ID,"0x0E",'b',message) >> 4));
-		VS2i = ((_i2cAdapter->I2cGet("0",ID,"Ox0F",'b',message) << 4) | (_i2cAdapter->I2cGet("0",ID,"0x10",'b',message) >> 4));
+		VS1i = ((_i2cAdapter->I2cGet("0",ID,"0x0D",'b',message) << 4) | (_i2cAdapter->I2cGet("0",ID,"0x0E",'b',message) >> 4));
+		VS2i = ((_i2cAdapter->I2cGet("0",ID,"0x0F",'b',message) << 4) | (_i2cAdapter->I2cGet("0",ID,"0x10",'b',message) >> 4));
 
 		if(VS1i >= 2048)
 		{
