@@ -100,7 +100,7 @@ bool I2CTestModule::GetW_VWinfo(std::string &wvwInfo, std::string &message)
 
 bool I2CTestModule::GetN_VNinfo(std::string &nvnInfo, std::string &message)
 {
-	nvnInfo = GetInfo("0x4e", "N_VN", 1, message);
+	nvnInfo = GetInfo("0x4b", "N_VN", 1, message);
 
 	return true;
 }
