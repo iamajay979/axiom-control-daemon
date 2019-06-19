@@ -33,12 +33,11 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 	//Assumption is that the i2cbus is a valid integer, if names of i2cbus has to incorporated then a proper lookup function has to created similar to system func "i2cget"
 	//Allowed modes : 'b', 'w', 'c'
 	long i2cbus,chipAddress,dataAddress;
-	int file, res, size;
-	// std::cout<<i2cbusArg<<" "<<chipAddressArg<<" "<<dataAddressArg<<std::endl;
-	//can avoid all these try catch by using int and not string params
+	int file, res, size; //try with res as __s32/int32_t;
+	//can avoid all these try catch by using int and not string params 
 	try
 	{
-		i2cbus = std::stol(i2cbusArg,nullptr,0);
+		i2cbus = std::stol(i2cbusArg, nullptr, 0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -53,7 +52,7 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		chipAddress = std::stol(chipAddressArg,nullptr,0);
+		chipAddress = std::stol(chipAddressArg, nullptr, 0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -68,7 +67,7 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{	
-		dataAddress = std::stol(dataAddressArg,nullptr,0);	
+		dataAddress = std::stol(dataAddressArg, nullptr, 0);	
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -77,13 +76,11 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 	}
 	if(dataAddress > 0xff)//handle negative except -1
 	{	
-		// std::cout<<dataAddressArg<<std::endl;
-		// std::cout<<dataAddress<<std::endl;
 		message = "Error : Data Address out of range";
 		return -1;
 	}
 
-	file = Openi2cDev(i2cbus,message);
+	file = Openi2cDev(i2cbus, message);
 
 	if(file < 0)
 	{	
@@ -134,7 +131,7 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		message = "Error : Read Failed ";
 		return -1;
 	}
-	//message  = std::to_string(res);
+
 	return res;
 }
 
@@ -146,7 +143,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		i2cbus = std::stol(i2cbusArg,nullptr,0);
+		i2cbus = std::stol(i2cbusArg, nullptr, 0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -161,7 +158,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		chipAddress = std::stol(chipAddressArg,nullptr,0);
+		chipAddress = std::stol(chipAddressArg, nullptr, 0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -176,7 +173,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		dataAddress = std::stol(dataAddressArg,nullptr,0);	
+		dataAddress = std::stol(dataAddressArg, nullptr, 0);	
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -191,7 +188,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	try
 	{
-		value = std::stol(valueArg ,nullptr,0);
+		value = std::stol(valueArg, nullptr, 0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -252,19 +249,19 @@ int I2CAdapter::Openi2cDev(int i2cbus, std::string &message)
 {
 	int file;
 	std::string filename = "/dev/i2c-" + std::to_string(i2cbus);
-	file = open(filename.c_str() ,O_RDWR);
+	file = open(filename.c_str(), O_RDWR);
 	return file;
 	//Add further error handling if required
 }
 
-int I2CAdapter::SetSlaveAddr(int file , int chipAddress ,std::string &message) // if required add force flag in this function 
+int I2CAdapter::SetSlaveAddr(int file, int chipAddress, std::string &message) // if required add force flag in this function 
 {	
 	std::stringstream ss;
 	if(ioctl(file, I2C_SLAVE, chipAddress) < 0)
 	{	
 		ss << std::hex << std::setw(2) << std::setfill('0') << chipAddress ; //to return error message address in hex format
-		message = "Could n qot set address to 0x" + ss.str(); 
-		return -errno;
+		message = "Could not set address to 0x" + ss.str(); 
+		return - errno;
 	}
 	return 0;
 }

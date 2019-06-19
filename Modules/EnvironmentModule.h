@@ -28,7 +28,7 @@ class EnvironmentModule : public IDaemonModule
 	bool GetVccoddr(std::string& voltage, std::string& message);
 	bool GetVrefp(std::string& voltage, std::string& message);
 	bool GetVrefn(std::string& voltage, std::string& message);
-	void GetVoltage(const std::string voltageRaw, const std::string voltageScale, std::string& voltage ,std::string& message);
+	void GetVoltage(const std::string voltageRaw, const std::string voltageScale, std::string& voltage, std::string& message);
 
 public:
 	EnvironmentModule();
