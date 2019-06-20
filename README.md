@@ -23,24 +23,24 @@ Build and usage instructions: https://wiki.apertus.org/index.php/Control_Daemon
   - `./DaemonCLI voltages get vrefn`
 
 - I2CTestModule (Makes use of I2CAdapter , Should be renamed to Pac1720InfoModule)
-  -`./DaemonCLI i2c_test get pac1720info` (Returns all the info listed below in combined form)
-  -`./DaemonCLI i2c_test get ZED_5V `
-  -`./DaemonCLI i2c_test get HDN`
-  -`./DaemonCLI i2c_test get RFW_V`
-  -`./DaemonCLI i2c_test get VCCO_35`
-  -`./DaemonCLI i2c_test get PCIE_IO`
-  -`./DaemonCLI i2c_test get W_VW`
-  -`./DaemonCLI i2c_test get N_VN`
-  -`./DaemonCLI i2c_test get E_VE`
-  -`./DaemonCLI i2c_test get S_VS`
-  -`./DaemonCLI i2c_test get BETA_5V`
-  -`./DaemonCLI i2c_test get PCIE_S_V`
-  -`./DaemonCLI i2c_test get IOW_V`
-  -`./DaemonCLI i2c_test get IOE_V`
-  -`./DaemonCLI i2c_test get VCCO_13`
-  -`./DaemonCLI i2c_test get VCCO_34`
-  -`./DaemonCLI i2c_test get N_VW`
-  -`./DaemonCLI i2c_test get N_VE`
-  -`./DaemonCLI i2c_test get S_VE`
-  -`./DaemonCLI i2c_test get S_VW`
+  - `./DaemonCLI i2c_test get pac1720info` (Returns all the info listed below in combined form)
+  - `./DaemonCLI i2c_test get ZED_5V `
+  - `./DaemonCLI i2c_test get HDN`
+  - `./DaemonCLI i2c_test get RFW_V`
+  - `./DaemonCLI i2c_test get VCCO_35`
+  - `./DaemonCLI i2c_test get PCIE_IO`
+  - `./DaemonCLI i2c_test get W_VW`
+  - `./DaemonCLI i2c_test get N_VN`
+  - `./DaemonCLI i2c_test get E_VE`
+  - `./DaemonCLI i2c_test get S_VS`
+  - `./DaemonCLI i2c_test get BETA_5V`
+  - `./DaemonCLI i2c_test get PCIE_S_V`
+  - `./DaemonCLI i2c_test get IOW_V`
+  - `./DaemonCLI i2c_test get IOE_V`
+  - `./DaemonCLI i2c_test get VCCO_13`
+  - `./DaemonCLI i2c_test get VCCO_34`
+  - `./DaemonCLI i2c_test get N_VW`
+  - `./DaemonCLI i2c_test get N_VE`
+  - `./DaemonCLI i2c_test get S_VE`
+  - `./DaemonCLI i2c_test get S_VW`
   
