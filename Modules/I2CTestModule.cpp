@@ -100,7 +100,7 @@ bool I2CTestModule::GetW_VWinfo(std::string &wvwInfo, std::string &message)
 
 bool I2CTestModule::GetN_VNinfo(std::string &nvnInfo, std::string &message)
 {
-	nvnInfo = GetInfo("0x4e", "N_VN", 1, message);
+	nvnInfo = GetInfo("0x4b", "N_VN", 1, message);
 
 	return true;
 }
@@ -221,8 +221,8 @@ std::string I2CTestModule::GetInfo(const std::string id, const std::string senso
 	}
 	else
 	{
-		voltageSource = GetVoltageSource(id, 1, message);
-		voltageSense = GetVoltageSense(id, 1, message);
+		voltageSource = GetVoltageSource(id, 0, message);
+		voltageSense = GetVoltageSense(id, 0, message);
 	}
 	current = GetCurrent(voltageSense);
 

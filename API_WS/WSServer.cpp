@@ -17,8 +17,7 @@ WSServer::~WSServer()
 }
 
 void WSServer::Setup()
-{   
-    std::cout<<"Server Setup"<<std::endl;
+{
     _server = std::make_shared<wsserver>();
 
     auto messageHandler = [&](wsserver* s, websocketpp::connection_hdl hdl, wsserver::message_ptr msg)
@@ -26,9 +25,9 @@ void WSServer::Setup()
         //ws->send("ACK", 3, opCode);
         std::string convertedMessage = msg->get_payload();
         std::string responseMessage;
-        _messageHandler->ProcessMessage(convertedMessage, responseMessage);
-
-        s->send(hdl, responseMessage, msg->get_opcode());//sends data to web remote probably
+        bool status = _messageHandler->ProcessMessage(convertedMessage, responseMessage);
+        
+        s->send(hdl, responseMessage, msg->get_opcode());
     };
 
     _server->set_access_channels(websocketpp::log::alevel::all);
@@ -38,9 +37,7 @@ void WSServer::Setup()
     _server->init_asio();
 
     // Register our message handler
-    std::cout<<"Done steps"<<std::endl;
     _server->set_message_handler(std::bind(messageHandler, _server.get(), ::_1, ::_2));
-    std::cout<<"Done final steps"<<std::endl;
 }
 
 void WSServer::Start()

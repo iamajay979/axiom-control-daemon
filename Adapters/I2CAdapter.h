@@ -42,7 +42,6 @@ public:
             syslog (LOG_ERR, "%s", errorMessage.c_str());
             return;
         }
-
         //json j;
         //in >> j;
     }

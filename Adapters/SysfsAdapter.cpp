@@ -28,14 +28,13 @@ void SysfsAdapter::WriteBlock(uint8_t *data, unsigned int length)
 
 void SysfsAdapter::Execute() {}
 
-void SysfsAdapter::ReadFile(std::string filename,std::string &message)
+void SysfsAdapter::ReadFile(std::string filename, std::string &message)
 {	
 	char buffer[1024]; //Is this sufficient ?
 	ssize_t len;
 	int fd;
 
-
-	fd = open(filename.c_str(),O_RDONLY);
+	fd = open(filename.c_str(), O_RDONLY);
 	if(fd < 0)
 	{
 		message = "Error opening file !";
@@ -54,7 +53,7 @@ void SysfsAdapter::ReadFile(std::string filename,std::string &message)
 	close(fd);
 }
 
-void SysfsAdapter::Glob(const std::string filename,std::vector<std::string> &filenames,std::string &message)
+void SysfsAdapter::Glob(const std::string filename, std::vector<std::string> &filenames, std::string &message)
 {
     glob_t glob_result;
     memset(&glob_result, 0, sizeof(glob_result));

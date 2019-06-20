@@ -22,7 +22,7 @@ class MessageHandler : public IMessageHandler
     socklen_t _sockaddrLength;
 
     // TODO (BAndiT1983): Rework, possibly shrink it, as the data is much smaller currently
-    char _response[1024];
+    char _response[2048];
     
     // Using separate lists for now as it seems that flatbuffers does not use inheritance for unions
     std::vector<flatbuffers::Offset<DaemonRequest>> _settings;

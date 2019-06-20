@@ -34,8 +34,8 @@ public:
 
     void Execute() override;
 
-    void ReadFile(std::string filename,std::string &message);
-	void Glob(const std::string filename,std::vector<std::string> &filenames ,std::string &message);
+    void ReadFile(std::string filename, std::string &message);
+	void Glob(const std::string filename, std::vector<std::string> &filenames, std::string &message);
 };
 
 

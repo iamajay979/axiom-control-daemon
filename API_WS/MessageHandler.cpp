@@ -106,7 +106,7 @@ void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
     //send(clientSocket, _builder->GetBufferPointer(), _builder->GetSize(), 0);
 
     sendto(clientSocket, _builder->GetBufferPointer(), _builder->GetSize(), 0, reinterpret_cast<struct sockaddr*>(&address), _sockaddrLength);
-    ssize_t i = recvfrom(clientSocket, &_response, 1023, 0, reinterpret_cast<struct sockaddr*>(&address), &_sockaddrLength);
+    ssize_t i = recvfrom(clientSocket, &_response, 2047, 0, reinterpret_cast<struct sockaddr*>(&address), &_sockaddrLength);
     if(i < 0)
     {
         std::cout << "RECEIVE ERROR: " << strerror(errno) << std::endl;
@@ -158,8 +158,5 @@ void MessageHandler::AddDaemonRequest(const std::string& sender, const std::stri
     request.value2 = value2;
 
     auto req = CreateDaemonRequest(*_builder, &request);
-    _settings.push_back(req);
-    _settings.push_back(req);
-    _settings.push_back(req);
     _settings.push_back(req);
 }
