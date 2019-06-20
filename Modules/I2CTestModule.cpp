@@ -214,16 +214,9 @@ std::string I2CTestModule::GetInfo(const std::string id, const std::string senso
 
 	SetSampleTime(id, message);
 
-	if (flag)
-	{
-		voltageSource = GetVoltageSource(id, 1, message);
-		voltageSense = GetVoltageSense(id, 1, message);
-	}
-	else
-	{
-		voltageSource = GetVoltageSource(id, 0, message);
-		voltageSense = GetVoltageSense(id, 0, message);
-	}
+	voltageSource = GetVoltageSource(id, flag, message);
+	voltageSense = GetVoltageSense(id, flag, message);
+
 	current = GetCurrent(voltageSense);
 
 	sprintf(buff,"%-14.14s\t%6.4f V\t%+8.4f mV  %+8.2f mA\n",sensorName.c_str(),voltageSource,voltageSense ,current);
@@ -236,16 +229,20 @@ double I2CTestModule::GetVoltageSource(const std::string id, int flag, std::stri
 {
 	int voltageSourceHex;
 	double voltageSource;
-
+	std::string dataAddress1;
+	std::string dataAddress2;
 	if(flag)
-	{
-		voltageSourceHex = ((_i2cAdapter->I2cGet("0", id, "0x11", 'b', message) << 8) | (_i2cAdapter->I2cGet("0", id, "0x12", 'b', message)));
+	{	
+		dataAddress1 = "0x11";
+		dataAddress2 = "0x12";
 	}
 	else
 	{
-		voltageSourceHex = ((_i2cAdapter->I2cGet("0", id, "0x13", 'b', message) << 8) | (_i2cAdapter->I2cGet("0" ,id, "0x14", 'b', message)));
+		dataAddress1 = "0x13";
+		dataAddress2 = "0x14";
 	}
 
+	voltageSourceHex = ((_i2cAdapter->I2cGet("0", id, dataAddress1, 'b', message) << 8) | (_i2cAdapter->I2cGet("0", id, dataAddress2, 'b', message)));
 	voltageSource = voltageSourceHex * 20 / static_cast<double>(32768);
 
 	return voltageSource;
@@ -255,16 +252,21 @@ double I2CTestModule::GetVoltageSense(const std::string id, int flag, std::strin
 {
 	int voltageSenseHex, temp;
 	double voltageSense;
-
+	std::string dataAddress1;
+	std::string dataAddress2;
 	if(flag)
-	{
-		voltageSenseHex = ((_i2cAdapter->I2cGet("0", id, "0x0D", 'b', message) << 4) | (_i2cAdapter->I2cGet("0", id, "0x0E", 'b', message) >> 4));
+	{	
+		dataAddress1 = "0x0D";
+		dataAddress2 = "0x0E";
 	}
 	else
 	{
-		voltageSenseHex = ((_i2cAdapter->I2cGet("0", id, "0x0F", 'b', message) << 4) | (_i2cAdapter->I2cGet("0", id, "0x10", 'b', message) >> 4));
+		dataAddress1 = "0x0F";
+		dataAddress2 = "0x10";
 	}
 
+	voltageSenseHex = ((_i2cAdapter->I2cGet("0", id, dataAddress1, 'b', message) << 4) | (_i2cAdapter->I2cGet("0", id, dataAddress2, 'b', message) >> 4));
+	
 	if(voltageSenseHex >= 2048)
 	{
 		temp = voltageSenseHex - 4096;
