@@ -19,7 +19,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "smbus.h"
+#include "../3rdParty/smbus/SMBus.h"
  
 // #include <json/json.hpp>
 // using json = nlohmann::json;

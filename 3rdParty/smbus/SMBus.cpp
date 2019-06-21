@@ -18,7 +18,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-dev.h>
 
-#include "smbus.h"
+#include "SMBus.h"
 
 /* Compatibility defines */
 #ifndef I2C_SMBUS_I2C_BLOCK_BROKEN
