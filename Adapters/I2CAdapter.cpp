@@ -104,12 +104,12 @@ int I2CAdapter::SetAddressPointer(int busFd, char *buff, int size)
 	return res;
 }
 
-long I2CAdapter::StrToLong(std::string hexStr)
+int I2CAdapter::StrToInt(std::string hexStr)
 {   
-	long val;
+	int val;
 	try
 	{
-		val = std::stol(hexStr, nullptr, 0);
+		val = std::stoi(hexStr, nullptr, 0);
 	}
 	catch(const std::invalid_argument& ia)
 	{
@@ -123,10 +123,10 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 {	
 	//Assumption is that the i2cbus is a valid integer, if names of i2cbus has to incorporated then a proper lookup function has to created similar to system func "i2cget"
 	//Allowed modes : 'b', 'w', 'c'
-	long i2cbus, chipAddress, dataAddress;
+	int i2cbus, chipAddress, dataAddress;
 	int file, res, size; 
 
-	i2cbus = StrToLong(i2cbusArg);
+	i2cbus = StrToInt(i2cbusArg);
 	if(i2cbus < 0)
 	{
 		message = "Error : Invalid argument";
@@ -138,7 +138,7 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		return -1;
 	}
 
-	chipAddress = StrToLong(chipAddressArg);
+	chipAddress = StrToInt(chipAddressArg);
 	if(chipAddress < 0)
 	{
 		message = "Error : Invalid argument";
@@ -152,7 +152,7 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	if (dataAddressArg != "-1")
 	{
-		dataAddress = StrToLong(dataAddressArg);
+		dataAddress = StrToInt(dataAddressArg);
 		if(dataAddress < 0)
 		{
 			message = "Error : Invalid argument";
@@ -212,10 +212,10 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::string dataAddressArg, std::string valueArg, char mode , std::string &message)
 {
-	long i2cbus, chipAddress, dataAddress ,value;
+	int i2cbus, chipAddress, dataAddress ,value;
 	int file, res, size;
 
-	i2cbus = StrToLong(i2cbusArg);
+	i2cbus = StrToInt(i2cbusArg);
 	if(i2cbus < 0)
 	{
 		message = "Error : Invalid argument";
@@ -227,7 +227,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		return -1;
 	}
 
-	chipAddress = StrToLong(chipAddressArg);
+	chipAddress = StrToInt(chipAddressArg);
 	if(chipAddress < 0)
 	{
 		message = "Error : Invalid argument";
@@ -239,7 +239,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		return -1;
 	}
 
-	dataAddress = StrToLong(dataAddressArg);
+	dataAddress = StrToInt(dataAddressArg);
 	if(dataAddress < 0)
 	{
 		message = "Error : Invalid argument";
@@ -251,7 +251,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		return -1;
 	}
 
-	value = StrToLong(valueArg);
+	value = StrToInt(valueArg);
 	if(value < 0)
 	{
 		message = "Error : Invalid argument";
@@ -323,7 +323,7 @@ int I2CAdapter::SetSlaveAddr(int file, int chipAddress, std::string &message) //
 	if(ioctl(file, I2C_SLAVE, chipAddress) < 0)
 	{	
 		ss << std::hex << std::setw(2) << std::setfill('0') << chipAddress ; //to return error message address in hex format
-		message = "Could not set address to 0x" + ss.str(); 
+		message = "Error : Could not set address to 0x" + ss.str(); 
 		return - errno;
 	}
 	return 0;

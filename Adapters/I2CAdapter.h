@@ -30,7 +30,7 @@ class I2CAdapter : public IAdapter
 {
     int Openi2cDev(int i2cbus, std::string &message);
     int SetSlaveAddr(int file, int chipAddress, std::string &message);
-    long StrToLong(std::string hexStr);
+    int StrToInt(std::string hexStr);
     int SetAddressPointer(int busFd, char *buff, int size);
     int WriteRegister(int busFd, int dataAddress, int value, int size, std::string &message);
     int ReadRegister(int busFd, int dataAddress, int size, std::string &message);
