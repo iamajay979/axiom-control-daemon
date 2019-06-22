@@ -40,7 +40,7 @@ int I2CAdapter::ReadRegister(int busFd, int dataAddress, int size, std::string &
 	{
 		reg_buf[0] = dataAddress;
 
-		res = SetAddressPointer(file, reg_buf, 1);
+		res = SetAddressPointer(busFd, reg_buf, 1);
 		if(res != 1)
 		{
 			message = "Error : Failed to set address pointer";
@@ -71,6 +71,7 @@ int I2CAdapter::WriteRegister(int busFd, int dataAddress, int value, int size, s
 {	
 	char buff[BUFFERSIZE];
 	std::stringstream ss;
+	int res;
 
 	if(size == 2)
 	{
@@ -103,7 +104,7 @@ int I2CAdapter::SetAddressPointer(int busFd, char *buff, int size)
 	return res;
 }
 
-long StrToLong(std::string hexStr)
+long I2CAdapter::StrToLong(std::string hexStr)
 {   
 	long val;
 	try
@@ -212,7 +213,7 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::string dataAddressArg, std::string valueArg, char mode , std::string &message)
 {
 	long i2cbus, chipAddress, dataAddress ,value;
-	int file, res;
+	int file, res, size;
 
 	i2cbus = StrToLong(i2cbusArg);
 	if(i2cbus < 0)

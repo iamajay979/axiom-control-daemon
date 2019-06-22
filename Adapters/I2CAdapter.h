@@ -18,8 +18,6 @@
 #include <linux/i2c-dev.h>
 #include <iomanip>
 #include <sstream>
-
-#include "../3rdParty/smbus/SMBus.h"
  
 // #include <json/json.hpp>
 // using json = nlohmann::json;
@@ -30,6 +28,13 @@
 
 class I2CAdapter : public IAdapter
 {
+    int Openi2cDev(int i2cbus, std::string &message);
+    int SetSlaveAddr(int file, int chipAddress, std::string &message);
+    long StrToLong(std::string hexStr);
+    int SetAddressPointer(int busFd, char *buff, int size);
+    int WriteRegister(int busFd, int dataAddress, int value, int size, std::string &message);
+    int ReadRegister(int busFd, int dataAddress, int size, std::string &message);
+
 public:
     I2CAdapter();
     
@@ -55,8 +60,6 @@ public:
 
     int I2cGet(std::string i2cbusArg, std::string chipAddressArg, std::string dataAddressArg, char mode, std::string &message);
     int I2cSet(std::string i2cbusArg, std::string chipAddressArg, std::string dataAddressArg, std::string valueArg, char mode, std::string &message);
-    int Openi2cDev(int i2cbus, std::string &message);
-    int SetSlaveAddr(int file, int chipAddress, std::string &message);
 
     void Execute() override;
 
