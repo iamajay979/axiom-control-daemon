@@ -1,5 +1,6 @@
 #include "I2CAdapter.h"
 
+#define BUFFERSIZE 10
 I2CAdapter::I2CAdapter()
 {
 }
@@ -28,20 +29,106 @@ void I2CAdapter::WriteBlock(uint8_t *data, unsigned int length)
 
 void I2CAdapter::Execute() {}
 
+int I2CAdapter::ReadRegister(int busFd, int dataAddress, int size, std::string &message)
+{
+	char reg_buf[1];
+	char buff[BUFFERSIZE];
+	std::stringstream ss;
+	int res;
+
+	if(dataAddress != -1) //Data address is provided ,hence set pointer to it, else read default add.
+	{
+		reg_buf[0] = dataAddress;
+
+		res = SetAddressPointer(file, reg_buf, 1);
+		if(res != 1)
+		{
+			message = "Error : Failed to set address pointer";
+			return -1;
+		}
+	}
+
+	res = read(busFd, buff, size);
+	if(res != size)
+	{	
+		ss << "0x" << std::hex << dataAddress;
+		message = "Error : Failed to read " + ss.str();
+		return -1;
+	}
+
+	ss<<"0x";  //Convert char buffer to hex string
+	for (int i = size - 1;i >= 0 ; i--)
+	{	
+		ss<<std::hex<<static_cast<int>(buff[i]);
+	}
+	
+	res = std::stol(ss.str(), nullptr, 0);
+
+	return res;
+}
+
+int I2CAdapter::WriteRegister(int busFd, int dataAddress, int value, int size, std::string &message)
+{	
+	char buff[BUFFERSIZE];
+	std::stringstream ss;
+
+	if(size == 2)
+	{
+		buff[0] = dataAddress;
+		buff[1] = value;
+	}
+	if(size == 3)
+	{
+		buff[0] = dataAddress;
+		buff[1] = (value >> 0) & 0xFF;
+		buff[2] = (value >> 8) & 0xFF;
+	}
+
+	res = write(busFd, buff, size);
+	if(res != size)
+	{
+		ss << "0x" << std::hex << dataAddress;
+		message = "Error : Failed to write at " + ss.str();
+		return -1;
+	}
+
+	return res;
+}
+
+int I2CAdapter::SetAddressPointer(int busFd, char *buff, int size)
+{
+	int res;
+	res = write(busFd, buff, size);
+
+	return res;
+}
+
+long StrToLong(std::string hexStr)
+{   
+	long val;
+	try
+	{
+		val = std::stol(hexStr, nullptr, 0);
+	}
+	catch(const std::invalid_argument& ia)
+	{
+		return -2;
+	}
+
+	return val;
+}
+
 int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::string dataAddressArg, char mode ,std::string &message)
 {	
 	//Assumption is that the i2cbus is a valid integer, if names of i2cbus has to incorporated then a proper lookup function has to created similar to system func "i2cget"
 	//Allowed modes : 'b', 'w', 'c'
-	long i2cbus,chipAddress,dataAddress;
-	int file, res, size; //try with res as __s32/int32_t;
-	//can avoid all these try catch by using int and not string params 
-	try
+	long i2cbus, chipAddress, dataAddress;
+	int file, res, size; 
+
+	i2cbus = StrToLong(i2cbusArg);
+	if(i2cbus < 0)
 	{
-		i2cbus = std::stol(i2cbusArg, nullptr, 0);
-	}
-	catch(const std::invalid_argument& ia)
-	{
-		message = "Invalid argument : " + std::string(ia.what());
+		message = "Error : Invalid argument";
 		return -1;
 	}
 	if (i2cbus > 0xFFFFF)
@@ -50,13 +137,10 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		return -1;
 	}
 
-	try
+	chipAddress = StrToLong(chipAddressArg);
+	if(chipAddress < 0)
 	{
-		chipAddress = std::stol(chipAddressArg, nullptr, 0);
-	}
-	catch(const std::invalid_argument& ia)
-	{
-		message = "Invalid argument : " + std::string(ia.what());
+		message = "Error : Invalid argument";
 		return -1;	
 	}
 	if(chipAddress < 0x03 || chipAddress > 0x77) //Replace them with const var ?
@@ -65,19 +149,23 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		return -1;
 	}
 
-	try
-	{	
-		dataAddress = std::stol(dataAddressArg, nullptr, 0);	
-	}
-	catch(const std::invalid_argument& ia)
+	if (dataAddressArg != "-1")
 	{
-		message = "Invalid argument : " + std::string(ia.what());
-		return -1;
+		dataAddress = StrToLong(dataAddressArg);
+		if(dataAddress < 0)
+		{
+			message = "Error : Invalid argument";
+			return -1;
+		}
+		if(dataAddress > 0xff)//handle negative except -1
+		{	
+			message = "Error : Data Address out of range";
+			return -1;
+		}
 	}
-	if(dataAddress > 0xff)//handle negative except -1
-	{	
-		message = "Error : Data Address out of range";
-		return -1;
+	else
+	{
+		dataAddress = -1;
 	}
 
 	file = Openi2cDev(i2cbus, message);
@@ -94,38 +182,24 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 	switch(mode)
 	{
-		case 'b' :
-		{ 
-			size = I2C_SMBUS_BYTE_DATA;
-			res = i2c_smbus_read_byte_data(file, dataAddress);
+		case 'b' : //read byte
+		{ 	
+			size = 1;
 			break;
 		}
-		case 'w' :
-		{
-			size = I2C_SMBUS_WORD_DATA;
-			res = i2c_smbus_read_word_data(file, dataAddress);
-			break;
-		}
-		case 'c' :
-		{
-			size = I2C_SMBUS_BYTE;
-			res = i2c_smbus_write_byte(file, dataAddress);
-			if (res < 0)
-			{
-				message = "Warning - Write Failed ";
-				return -1;
-			}
-			res = i2c_smbus_read_byte(file);
+		case 'w' : //read word
+		{	
+			size = 2;
 			break;
 		}
 		default :
 		{
-			size = I2C_SMBUS_BYTE_DATA;
-			res = i2c_smbus_read_word_data(file, dataAddress);
-			break;			
+			message = "Only byte(b) and word(w) operations are Allowed";
+			return -1;		
 		}
 	}
 
+	res = ReadRegister(file, dataAddress, size, message);
 	if (res < 0)
 	{
 		message = "Error : Read Failed ";
@@ -137,17 +211,13 @@ int I2CAdapter::I2cGet(std::string i2cbusArg, std::string chipAddressArg,std::st
 
 int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::string dataAddressArg, std::string valueArg, char mode , std::string &message)
 {
-	//Flags functionality not added as all scripts only use the 'y' flag ,so all functions assume 'y' is set
 	long i2cbus, chipAddress, dataAddress ,value;
 	int file, res;
 
-	try
+	i2cbus = StrToLong(i2cbusArg);
+	if(i2cbus < 0)
 	{
-		i2cbus = std::stol(i2cbusArg, nullptr, 0);
-	}
-	catch(const std::invalid_argument& ia)
-	{
-		message = "Invalid argument : " + std::string(ia.what());
+		message = "Error : Invalid argument";
 		return -1;
 	}
 	if (i2cbus > 0xFFFFF)
@@ -156,13 +226,10 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		return -1;
 	}
 
-	try
+	chipAddress = StrToLong(chipAddressArg);
+	if(chipAddress < 0)
 	{
-		chipAddress = std::stol(chipAddressArg, nullptr, 0);
-	}
-	catch(const std::invalid_argument& ia)
-	{
-		message = "Invalid argument : " + std::string(ia.what());
+		message = "Error : Invalid argument";
 		return -1;	
 	}
 	if(chipAddress < 0x03 || chipAddress > 0x77) //Replace them with const var ?
@@ -171,28 +238,22 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		return -1;
 	}
 
-	try
+	dataAddress = StrToLong(dataAddressArg);
+	if(dataAddress < 0)
 	{
-		dataAddress = std::stol(dataAddressArg, nullptr, 0);	
-	}
-	catch(const std::invalid_argument& ia)
-	{
-		message = "Invalid argument : " + std::string(ia.what());
+		message = "Error : Invalid argument";
 		return -1;
 	}
-	if(dataAddress < 0 || dataAddress > 0xff)
-	{
+	if(dataAddress > 0xff)//handle negative except -1
+	{	
 		message = "Error : Data Address out of range";
 		return -1;
 	}
 
-	try
+	value = StrToLong(valueArg);
+	if(value < 0)
 	{
-		value = std::stol(valueArg, nullptr, 0);
-	}
-	catch(const std::invalid_argument& ia)
-	{
-		message = "Invalid argument : " + std::string(ia.what());
+		message = "Error : Invalid argument";
 		return -1;
 	}
 	if(mode == 'b' && (value > 0xFF || value < 0))
@@ -203,7 +264,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 	{
 		message = "Error: Data value invalid! ";
 		return -1;
-	}
+	}	
 
 	file = Openi2cDev(i2cbus, message);
 	if(file < 0)
@@ -221,23 +282,24 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 	switch(mode)
 	{
 		case 'b':
-		{
-			res = i2c_smbus_write_byte_data(file, dataAddress, value);
+		{	
+			size = 2;
 			break;
 		}	
 		case 'w':
-		{
-			res = i2c_smbus_write_word_data(file, dataAddress, value);
+		{	
+			size = 3;
 			break;
 		}
 		default :
 		{
-			res = i2c_smbus_write_byte_data(file, dataAddress, value);
-			break;
+			message = "Only byte(b) and word(w) operations are Allowed";
+			return -1;
 		}
 	}
 
-	if(res < 0)
+	res = WriteRegister(file, dataAddress, value, size, message);
+	if(res != size)
 	{
 		message = "Error : Write failed ";
 		return -1;
