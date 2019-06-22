@@ -56,7 +56,7 @@ int I2CAdapter::ReadRegister(int busFd, int dataAddress, int size, std::string &
 		return -1;
 	}
 
-	ss<<"0x";  //Convert char buffer to hex string
+	ss << "0x";  //Convert char buffer to hex string
 	for (int i = size - 1;i >= 0 ; i--)
 	{	
 		ss<<std::hex<<static_cast<int>(buff[i]);
