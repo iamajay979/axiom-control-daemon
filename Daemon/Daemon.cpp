@@ -124,7 +124,7 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
 {
     auto req= UnPackDaemonRequest(receivedBuffer);//req is an object that is made from the buffer via UnPackDaemonRequest
 
-    std::string moduleName = req.get()->module_;
+    std::string moduleName = req.get()->header->module_;
 
     if(moduleName == "general")
     {
@@ -141,20 +141,35 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
     {
         message = "Received: Unknown module";
         DAEMON_LOG_INFO("Received: Unknown module");
-        req.get()->message = message;
+        req.get()->header->message = message;
         _builder.Finish(CreateDaemonRequest(_builder, req.get()));
         return;
     }
 
     auto module = _module_iterator->second;
+    // auto temp = req->data;
+    // auto union_type = temp.type;
+    auto union_type = req->data.type; //error
+    if (union_type == PacketData::StrParamPacket) 
+    {
+        auto strParamPacket = req->data.AsStrParamPacket();//error
+        std::string command = req->header->command; //works
+        std::string parameter = req->header->parameter; //works
+        std::string& message = req.get()->header->message; //works
+        std::string& value1 = strParamPacket->value1; //error
+        std::string& value2 = strParamPacket->value2; //error
+        // bool result = module->HandleParameter(req->header->command, req->header->parameter, &strParamPacket->value1, &strParamPacket->value2, req.get()->header->message);
 
-    std::string value = req->value1;
+    }
+    // std::string value = req->data->value1;
 
-    bool result = module->HandleParameter(req->command, req->parameter, req.get()->value1, req.get()->value2, req.get()->message);
+    // bool result = module->HandleParameter(req->header->command, req->header->parameter, req.get()->data->value1, req.get()->data->value2, req.get()->header->message);
 
+   
     // TODO (BAndiT1983):Check if assignments are really required, or if it's suitable of just passing reference to req attirbutes
-    req.get()->status = (result == true) ? "STATUS_SUCCESS" : "STATUS_FAIL";
-    req.get()->timestamp = GetCurrentTimestamp();
+    bool result = true;
+    req.get()->header->status = (result == true) ? "STATUS_SUCCESS" : "STATUS_FAIL";
+    req.get()->header->timestamp = GetCurrentTimestamp();
 
     _builder.Finish(CreateDaemonRequest(_builder, req.get()));
 }
@@ -162,26 +177,38 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
 bool Daemon::ProcessGeneralRequest(std::unique_ptr<DaemonRequestT> &req)
 {
     bool result = false;
-    req.get()->status = "fail";
+    req.get()->header->status = "fail";
+    auto union_type = req->data.type; //error
 
-    if(req.get()->command == "get" && req.get()->parameter == "available_parameters")
+    if (union_type == PacketData::StrParamPacket) 
     {
-        ProcessAvailableParameters(std::bind(&Daemon::RetrieveCurrentParameterValues, this, std::placeholders::_1, std::placeholders::_2));
+        auto strParamPacket = req->data.AsStrParamPacket();//error
+        auto command = req->header->command; //works
+        auto parameter = req->header->parameter; //works
+        auto message = req.get()->header->message; //works
+        auto value1 = strParamPacket->value1; //error
+        auto value2 = strParamPacket->value2; //error
 
-        req.get()->value1 = availableParameters.dump();
-        req.get()->message = "";
-        req.get()->status = "success";
-        req.get()->timestamp = GetCurrentTimestamp();
-    }
-    else if(req.get()->command == "reset")
-    {
-        ProcessAvailableParameters(std::bind(&Daemon::ResetParameterValues, this, std::placeholders::_1, std::placeholders::_2));
+        if(req.get()->header->command == "get" && req.get()->header->parameter == "available_parameters")
+        {
+            ProcessAvailableParameters(std::bind(&Daemon::RetrieveCurrentParameterValues, this, std::placeholders::_1, std::placeholders::_2));
 
-        req.get()->value1 = availableParameters.dump();
-        req.get()->message = "";
-        req.get()->status = "success";
-        req.get()->timestamp = GetCurrentTimestamp();
+            strParamPacket->value1 = availableParameters.dump();
+            req.get()->header->message = "";
+            req.get()->header->status = "success";
+            req.get()->header->timestamp = GetCurrentTimestamp();
+        }
+        else if(req.get()->header->command == "reset")
+        {
+            ProcessAvailableParameters(std::bind(&Daemon::ResetParameterValues, this, std::placeholders::_1, std::placeholders::_2));
+
+            strParamPacket->value1 = availableParameters.dump();
+            req.get()->header->message = "";
+            req.get()->header->status = "success";
+            req.get()->header->timestamp = GetCurrentTimestamp();
+        }
     }
+
 
     return result;
 }

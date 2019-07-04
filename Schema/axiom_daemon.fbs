@@ -1,15 +1,37 @@
 // TODO: Add namespace
-table DaemonRequest
+
+
+table Header
 {
-    sender: string; // e.g. "WSServer" for now
-    module: string; // e.g. "image_sensor"
-    command: string; // e.g. "set" or "get"
-    parameter: string; // e.g. "analog_gain"
-    value1: string; // e.g. "4"
-    value2: string; // e.g. "5.7"
+	sender: string;
+	module: string;
+	command: string;
+	parameter: string;
+    timestamp: string; 
     status: string; // used for reply from Daemon: success or fail
     message: string; // Status message, to get more info when request fails
-    timestamp: string; // date and time of camera, when request was send back to client
+}
+
+table BlobPacket
+{
+	value: [byte];
+}
+
+table StrParamPacket
+{
+	value1: string; // e.g. "4"
+    value2: string; // e.g. "5.7"
+}
+
+union PacketData 
+{
+	BlobPacket, StrParamPacket
+}
+
+table DaemonRequest
+{	
+	header:Header; //Tells information about the packet
+	data:PacketData; //Actual data
 }
 
 root_type DaemonRequest;

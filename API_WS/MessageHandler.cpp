@@ -80,10 +80,10 @@ bool MessageHandler::ProcessMessage(std::string message, std::string& response)
     std::unique_ptr<DaemonRequestT> req;
     TransferData(req);
 
-    setting.value1 = req.get()->value1;
-    setting.value2 = req.get()->value2;
-    setting.message = req.get()->message;
-    setting.status = req.get()->status;
+    // setting.value1 = req.get()->value1;
+    // setting.value2 = req.get()->value2;
+    // setting.message = req.get()->message;
+    // setting.status = req.get()->status;
     //setting.timestamp = req.get()->timestamp;
 
     json j = setting;
@@ -114,10 +114,10 @@ void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
         exit(1);
         //std::cout << "Response received" << std::enerrnodl;
     }
-
+    std::cout<<"========================here=========================="<<std::endl;
 
     req = UnPackDaemonRequest(_response);//DaemonRequest::UnPack(req, receivedBuffer);
-    std::cout << "RESPONSE MESSAGE: " << req.get()->status << std::endl;
+    std::cout << "RESPONSE MESSAGE: " << req.get()->header->status << std::endl;
 
     std::string message = "Data size: " + std::to_string(_builder->GetSize());
     std::cout << message.c_str() << std::endl;
@@ -128,8 +128,8 @@ void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
 
     std::cout << "TransferData() completed" << std::endl;
 
-    std::cout << "Response (message): " << req.get()->message << std::endl;
-    std::cout << "Response (status): " << req.get()->status << std::endl;
+    std::cout << "Response (message): " << req.get()->header->message << std::endl;
+    std::cout << "Response (status): " << req.get()->header->status << std::endl;
 }
 
 void MessageHandler::SetupSocket()
@@ -148,15 +148,35 @@ void MessageHandler::SetupSocket()
 }
 
 void MessageHandler::AddDaemonRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string& parameter, const std::string& value1, const std::string& value2)
-{
+{   
     DaemonRequestT request;
-    request.sender = sender;
-    request.module_ = module;
-    request.command = command;
-    request.parameter = parameter;
-    request.value1 = value1;
-    request.value2 = value2;
+    HeaderT header;
+    BlobPacketT blobPacket;
+    StrParamPacketT strParamPacket;
 
-    auto req = CreateDaemonRequest(*_builder, &request);
+    header.sender = sender;
+    header.module_ = module;
+    header.command = command;
+    header.parameter = parameter;
+
+    auto headerOffset = CreateHeader(*_builder, &header);
+
+    strParamPacket.value1 = value1;
+    strParamPacket.value2 = value2;
+
+    auto strParamPacketOffset = CreateStrParamPacket(*_builder, &strParamPacket);
+
+    auto req = CreateDaemonRequest(*_builder, headerOffset, PacketData::StrParamPacket, strParamPacketOffset.Union());
+
     _settings.push_back(req);
+    // DaemonRequestT request;
+    // request.sender = sender;
+    // request.module_ = module;
+    // request.command = command;
+    // request.parameter = parameter;
+    // request.value1 = value1;
+    // request.value2 = value2;
+
+    // auto req = CreateDaemonRequest (*_builder, &request);
+    // _settings.push_back(req);
 }

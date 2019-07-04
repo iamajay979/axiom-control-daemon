@@ -46,8 +46,21 @@ int main(int argc, char *argv[])
     messageHandler.TransferData(req);
     
     std::cout << "--------" << std::endl << "Response" << std::endl;
-    std::cout << "Value: " << req.get()->value1 << std::endl;
-    std::cout << "Message: " << req.get()->message << std::endl;
+      auto union_type = req->data.type; //error
+    if (union_type == PacketData::StrParamPacket) 
+    {
+        auto strParamPacket = req->data.AsStrParamPacket();//error
+        std::string command = req->header->command; //works
+        std::string parameter = req->header->parameter; //works
+        std::string& message = req.get()->header->message; //works
+        std::string& value1 = strParamPacket->value1; //error
+        std::string& value2 = strParamPacket->value2; //error
+        // bool result = module->HandleParameter(req->header->command, req->header->parameter, &strParamPacket->value1, &strParamPacket->value2, req.get()->header->message);
+    std::cout << "Value: " << strParamPacket->value1 << std::endl;
+
+    }
+    // std::cout << "Value: " << req.get()->value1 << std::endl;
+    std::cout << "Message: " << req.get()->header->message << std::endl;
     std::cout << "--------" << std::endl;
 
     return 0;
