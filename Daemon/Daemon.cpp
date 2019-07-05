@@ -149,22 +149,18 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
     auto module = _module_iterator->second;
     // auto temp = req->data;
     // auto union_type = temp.type;
-    auto union_type = req->data.type; //error
+    auto union_type = req->data.type;
+
     if (union_type == PacketData::StrParamPacket) 
-    {
-        auto strParamPacket = req->data.AsStrParamPacket();//error
-        std::string command = req->header->command; //works
-        std::string parameter = req->header->parameter; //works
-        std::string& message = req.get()->header->message; //works
-        std::string& value1 = strParamPacket->value1; //error
-        std::string& value2 = strParamPacket->value2; //error
-        // bool result = module->HandleParameter(req->header->command, req->header->parameter, &strParamPacket->value1, &strParamPacket->value2, req.get()->header->message);
-
+    {   
+        auto strParamPacket = req->data.AsStrParamPacket();
+        bool result = module->HandleParameter(req->header->command, req->header->parameter, strParamPacket->value1, strParamPacket->value2, req.get()->header->message);
     }
-    // std::string value = req->data->value1;
-
-    // bool result = module->HandleParameter(req->header->command, req->header->parameter, req.get()->data->value1, req.get()->data->value2, req.get()->header->message);
-
+    else
+    {   
+        std::cout<<"Handling For Blob Packet Not there"<<std::endl;
+        //Handle for blob type packet
+    }
    
     // TODO (BAndiT1983):Check if assignments are really required, or if it's suitable of just passing reference to req attirbutes
     bool result = true;
@@ -183,12 +179,7 @@ bool Daemon::ProcessGeneralRequest(std::unique_ptr<DaemonRequestT> &req)
     if (union_type == PacketData::StrParamPacket) 
     {
         auto strParamPacket = req->data.AsStrParamPacket();//error
-        auto command = req->header->command; //works
-        auto parameter = req->header->parameter; //works
-        auto message = req.get()->header->message; //works
-        auto value1 = strParamPacket->value1; //error
-        auto value2 = strParamPacket->value2; //error
-
+    
         if(req.get()->header->command == "get" && req.get()->header->parameter == "available_parameters")
         {
             ProcessAvailableParameters(std::bind(&Daemon::RetrieveCurrentParameterValues, this, std::placeholders::_1, std::placeholders::_2));

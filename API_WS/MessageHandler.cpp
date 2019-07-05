@@ -80,6 +80,8 @@ bool MessageHandler::ProcessMessage(std::string message, std::string& response)
     std::unique_ptr<DaemonRequestT> req;
     TransferData(req);
 
+    //Change here for new schema
+    
     // setting.value1 = req.get()->value1;
     // setting.value2 = req.get()->value2;
     // setting.message = req.get()->message;
@@ -114,11 +116,10 @@ void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
         exit(1);
         //std::cout << "Response received" << std::enerrnodl;
     }
-    std::cout<<"========================here=========================="<<std::endl;
 
     req = UnPackDaemonRequest(_response);//DaemonRequest::UnPack(req, receivedBuffer);
-    std::cout << "RESPONSE MESSAGE: " << req.get()->header->status << std::endl;
 
+    std::cout << "RESPONSE MESSAGE: " << req.get()->header->status << std::endl;
     std::string message = "Data size: " + std::to_string(_builder->GetSize());
     std::cout << message.c_str() << std::endl;
     
