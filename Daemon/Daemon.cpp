@@ -174,11 +174,11 @@ bool Daemon::ProcessGeneralRequest(std::unique_ptr<DaemonRequestT> &req)
 {
     bool result = false;
     req.get()->header->status = "fail";
-    auto union_type = req->data.type; //error
+    auto union_type = req->data.type; 
 
     if (union_type == PacketData::StrParamPacket) 
     {
-        auto strParamPacket = req->data.AsStrParamPacket();//error
+        auto strParamPacket = req->data.AsStrParamPacket();
     
         if(req.get()->header->command == "get" && req.get()->header->parameter == "available_parameters")
         {
@@ -199,7 +199,10 @@ bool Daemon::ProcessGeneralRequest(std::unique_ptr<DaemonRequestT> &req)
             req.get()->header->timestamp = GetCurrentTimestamp();
         }
     }
-
+    else
+    {
+        std::cout<<"Handling for blob packet not found"<<std::endl;
+    }
 
     return result;
 }
