@@ -40,11 +40,11 @@ void LutConfModule::ParseValues (std::vector<uint8_t>& lutBuffer, std::vector<in
 	{
 		if(lutBuffer[i] == '\n')
 		{
-			++count;
-
 			try
 			{
 				values[count] = stoi(temp);
+
+				std::cout<<values[count]<<std::endl;
 			}
 			catch(const std::invalid_argument& ia)
 			{
@@ -52,13 +52,14 @@ void LutConfModule::ParseValues (std::vector<uint8_t>& lutBuffer, std::vector<in
 				return ;
 			}
 			temp = "";
+			++count;
 		}
 		else
 		{
 			temp += lutBuffer[i];
 		}
 	}
-
+	std::cout<<count<<std::endl;
 	try
 	{
 		values[count] = stoi(temp);
@@ -88,3 +89,5 @@ bool LutConfModule::GetLut(std::vector<uint8_t>& lutBuffer, std::string& message
 
 	return true;
 }
+
+-N 4096 -M 65536  -G 1 -B 0x8030C000 -d
