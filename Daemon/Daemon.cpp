@@ -7,6 +7,8 @@
 
 #include "../Log/DefaultLogger.h"
 
+#define BUFFER_MAX 163840
+
 std::string GetCurrentTimestamp()
 {
     auto now = std::chrono::system_clock::now();
@@ -33,7 +35,7 @@ Daemon::Daemon() :
     _modules["temperatures"] = std::make_shared<EnvironmentModule>();
     _modules["voltages"] = std::make_shared<EnvironmentModule>();
     _modules["i2c_test"] = std::make_shared<I2CTestModule>();
-
+    _modules["lut_conf"] = std::make_shared<LutConfModule>();
     // TODO (BAndiT1983): Add real reading of revision/version
     //std::string/int?? revision = ReadRevision();
     //std::string revision = "29";
@@ -89,7 +91,7 @@ void Daemon::Process()
 
 void Daemon::ProcessClient(int socket)
 {
-    uint8_t* receivedBuffer = new uint8_t[1024];
+    uint8_t* receivedBuffer = new uint8_t[BUFFER_MAX];
     std::cout << "NEW CLIENT" << std::endl;
     std::cout << "Socket: " << socket << std::endl;
 
@@ -102,7 +104,7 @@ void Daemon::ProcessClient(int socket)
         }
 
         // Wait for packets to arrive
-        ssize_t size = RetrieveIncomingData(socket, receivedBuffer, 1024);
+        ssize_t size = RetrieveIncomingData(socket, receivedBuffer, BUFFER_MAX);
         if(size <= 0)
         {
             return;
@@ -110,13 +112,13 @@ void Daemon::ProcessClient(int socket)
 
         std::cout << "Received buffer size: " << receivedBuffer << std::endl;
         ProcessReceivedData(receivedBuffer);
-
         ssize_t error = send(socket, _builder.GetBufferPointer(), _builder.GetSize(), 0);
         if(error < 0)
         {
             std::cout << "Error while sending response." << std::endl;
             printf("SEND ERROR = %s\n", strerror(errno));
         }
+    //_builder.Clear(); Check if this needs to be added
     }
 }
 
@@ -125,7 +127,6 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
     auto req= UnPackDaemonRequest(receivedBuffer);//req is an object that is made from the buffer via UnPackDaemonRequest
 
     std::string moduleName = req.get()->header->module_;
-
     if(moduleName == "general")
     {
         ProcessGeneralRequest(req);
@@ -147,8 +148,6 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
     }
 
     auto module = _module_iterator->second;
-    // auto temp = req->data;
-    // auto union_type = temp.type;
     auto union_type = req->data.type;
 
     if (union_type == PacketData::StrParamPacket) 
@@ -158,20 +157,21 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
     }
     else
     {   
-        std::cout<<"Handling For Blob Packet Not there"<<std::endl;
-        //Handle for blob type packet
+        auto blobPacket = req->data.AsBlobPacket();
+        bool result = module->HandleBlobParameter(req->header->command, req->header->parameter, blobPacket->value, req->header->message);
     }
    
     // TODO (BAndiT1983):Check if assignments are really required, or if it's suitable of just passing reference to req attirbutes
     bool result = true;
     req.get()->header->status = (result == true) ? "STATUS_SUCCESS" : "STATUS_FAIL";
     req.get()->header->timestamp = GetCurrentTimestamp();
-
     _builder.Finish(CreateDaemonRequest(_builder, req.get()));
+
 }
 
 bool Daemon::ProcessGeneralRequest(std::unique_ptr<DaemonRequestT> &req)
-{
+{   
+    //change according to new pattern
     bool result = false;
     req.get()->header->status = "fail";
     auto union_type = req->data.type; 
@@ -201,7 +201,8 @@ bool Daemon::ProcessGeneralRequest(std::unique_ptr<DaemonRequestT> &req)
     }
     else
     {
-        std::cout<<"Handling for blob packet not found"<<std::endl;
+        //handle generalblob request if any in future
+        // std::cout<<"Handling for blob packet not found"<<std::endl;
     }
 
     return result;

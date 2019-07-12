@@ -14,12 +14,12 @@ table Header
 
 table BlobPacket
 {
-	value: [byte];
+	value: [ubyte];
 }
 
 table StrParamPacket
 {
-	value1: string; // e.g. "4"
+	value1: string; // e.g. "4"byte
     value2: string; // e.g. "5.7"
 }
 

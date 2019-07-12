@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <iostream> //remove this 
 
 #include "../Log/Logger.h"
 
@@ -15,13 +16,26 @@ class IDaemonModule
     // string value1, string value2, string& message, returns: bool - success or fail
     using SetterFunc = std::function<bool(std::string, std::string, std::string&)>;
 
+    using BlobSetterFunc = std::function<bool(std::vector<uint8_t>&, std::string&)>;
+    using BlobGetterFunc = std::function<bool(std::vector<uint8_t>&, std::string&)>;
+
+
     struct ParameterHandler
     {
         GetterFunc Getter;
         SetterFunc Setter;
     };
 
+    struct BlobParameterHandler
+    {
+        BlobGetterFunc Getter;
+        BlobSetterFunc Setter;
+    };
+
+
     std::unordered_map<std::string, ParameterHandler> parameterHandlers;
+    std::unordered_map<std::string, BlobParameterHandler> blobParameterHandlers;
+
 
     // TODO: Don't remove commented and related parts yet, maybe we need individual methods later, to trigger special functionality, which ar not related to parameters directly
     //typedef std::function<bool(std::string&)> CallbackFunc;
@@ -70,10 +84,50 @@ protected:
         parameterHandlers.insert(std::make_pair(name, ParameterHandler{getter, setter}));
     }
 
+    void AddBlobParameterHandler(std::string name, BlobGetterFunc getter, BlobSetterFunc setter)
+    {
+        blobParameterHandlers.insert(std::make_pair(name, BlobParameterHandler{getter, setter}));
+    }
+
 public:
     virtual ~IDaemonModule() = default;
 
     //virtual std::vector<std::string>GetAvailableMethods() = 0;
+
+    //TODO : Make function to do common tasks of HandleBlobParameter and HandleParameter
+    bool HandleBlobParameter(std::string command, std::string parameterName, std::vector<uint8_t>& parameterValue, std::string& message)
+    {   
+
+        // TODO : Check if two parameter values are required
+        std::string originalParameterName = parameterName;
+        std::unordered_map<std::string, BlobParameterHandler>::const_iterator got = blobParameterHandlers.find (parameterName);
+        if ( got == blobParameterHandlers.end() )
+        {
+            DAEMON_LOG_ERROR("Handler not found");
+            message = "Handler not found: " + parameterName;
+            return false;
+        }
+        else
+        {
+            DAEMON_LOG_INFO("Handler found");
+
+            auto handler = got->second;
+            //auto method = (command == "set") ? handler.Setter : handler.Getter;
+            bool result = false;
+            if(command == "set")
+            {   
+                result = handler.Setter(parameterValue, message); 
+                std::cout<<result<<std::endl;
+            }
+            else if(command == "get")
+            {
+                result = handler.Getter(parameterValue, message); 
+            }
+
+            return result;
+        }
+        return true;
+    }
 
     bool HandleParameter(std::string command, std::string parameterName, std::string& parameterValue1, std::string& parameterValue2, std::string& message)
     {
@@ -104,6 +158,7 @@ public:
             return result;
         }
     }
+
 };
 
 #endif //IDAEMONMODULE_H
