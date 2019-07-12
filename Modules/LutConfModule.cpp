@@ -77,7 +77,7 @@ bool LutConfModule::SetLut(std::vector<uint8_t>& lutBuffer, std::string& message
 	for(unsigned int i = 0; i < values.size(); i++)
 	{
 		// std::cout<<values[i]<<std::endl;
-		// _memoryAdapter->WriteWord(i, values[i]);
+		_memoryAdapter->WriteWord(i, values[i]);
 	}
 	return true;
 }
