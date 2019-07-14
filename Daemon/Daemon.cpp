@@ -118,7 +118,7 @@ void Daemon::ProcessClient(int socket)
             std::cout << "Error while sending response." << std::endl;
             printf("SEND ERROR = %s\n", strerror(errno));
         }
-    //_builder.Clear(); Check if this needs to be added
+    _builder.Clear();
     }
 }
 
