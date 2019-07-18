@@ -90,4 +90,3 @@ bool LutConfModule::GetLut(std::vector<uint8_t>& lutBuffer, std::string& message
 	return true;
 }
 
--N 4096 -M 65536  -G 1 -B 0x8030C000 -d
