@@ -46,6 +46,7 @@ public:
 
     void AddDaemonStrParamRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::string& value1, const std::string& value2 = nullptr);
     void AddDaemonBlobRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::vector<uint8_t>& lut_buffer);
+    void AddDaemonI2cRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::string& value1, const std::string& value2, const std::string& value3, const std::string& value4);
     void OutputReceivedData(ns::JSONSetting setting, std::string& message);
 };
 

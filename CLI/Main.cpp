@@ -6,10 +6,11 @@
 #include "json/json.hpp"
 using json = nlohmann::json;
 
-int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue)
+int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue, std::string& thirdValue, std::string& fourthValue)
 {
     switch(argc)
     {
+        std::cout<<argc<<std::endl;
     case 3:
         argv[3] =  const_cast<char*>("");
         break;
@@ -20,6 +21,12 @@ int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue)
         break;
     case 6:
         secondValue = argv[5];
+        break;
+    case 7:
+        thirdValue = argv[6];
+        break;
+    case 8:
+        fourthValue = argv[7];
         break;
     default:
         std::cout << "Not enough arguments." << std::endl;
@@ -35,13 +42,22 @@ int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue)
 int main(int argc, char *argv[])
 {
     std::string secondValue = "";
-    if(HandleCommandLine(argc, argv, secondValue) == 1)
+    std::string thirdValue = "";
+    std::string fourthValue = "";
+    std::cout<<"dasdasdas"<<std::endl;
+    if(HandleCommandLine(argc, argv, secondValue, thirdValue, fourthValue) == 1)
     {
         return 0;
     }
-
+    std::cout<<"here"<<std::endl;
     MessageHandler messageHandler;
     std::unique_ptr<DaemonRequestT> req;
+
+    if(std::string(argv[1]) == "i2c")
+    {                                   //./DaemonCLI   i2c0     get      i2c0     chip     data         value       mode
+        messageHandler.AddDaemonI2cRequest("DaemonCLI", argv[1], argv[2], argv[3], argv[4], secondValue, thirdValue, fourthValue);
+        messageHandler.TransferData(req);
+    }
     
     if(std::string(argv[1]) == "lut_conf")
     {   
@@ -56,7 +72,6 @@ int main(int argc, char *argv[])
         std::cout << "--------" << std::endl << "Response" << std::endl;
         std::cout << "Message: " << req.get()->header->message << std::endl;
         std::cout << "--------" << std::endl;
-
     }
     else
     {   

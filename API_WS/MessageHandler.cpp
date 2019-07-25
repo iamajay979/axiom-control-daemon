@@ -201,3 +201,28 @@ void MessageHandler::AddDaemonStrParamRequest(const std::string& sender, const s
     _settings.push_back(req);
 
 }
+
+void MessageHandler::AddDaemonI2cRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::string& value1, const std::string& value2, const std::string& value3, const std::string& value4)
+{
+    DaemonRequestT request;
+    HeaderT header;
+    I2cPacketT i2cPacket;
+
+    header.sender = sender;
+    header.module_ = module;
+    header.command = command;
+    header.parameter = parameter;
+
+    auto headerOffset = CreateHeader(*_builder, &header);
+
+    i2cPacket.value1 = value1;
+    i2cPacket.value2 = value2;
+    i2cPacket.value3 = value3;
+    i2cPacket.value4 = value4;
+
+    auto i2cPacketOffset = CreateI2cPacket(*_builder, &i2cPacket);
+
+    auto req = CreateDaemonRequest(*_builder, headerOffset, PacketData::I2cPacket, i2cPacketOffset.Union());
+
+    _settings.push_back(req);
+}
