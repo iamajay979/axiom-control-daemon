@@ -114,6 +114,7 @@ public:
         // TODO : Check if two parameter values are required
         std::string originalParameterName = parameterName;
         std::unordered_map<std::string, BlobParameterHandler>::const_iterator got = blobParameterHandlers.find(parameterName);
+
         if ( got == blobParameterHandlers.end() )
         {
             DAEMON_LOG_ERROR("Handler not found");
@@ -139,7 +140,6 @@ public:
 
             return result;
         }
-        return true;
     }
     bool HandleI2cParameter(std::string command, std::string parameterName, std::string& parameterValue1, std::string& parameterValue2, std::string& parameterValue3, std::string& parameterValue4, std::string& message)
     {
@@ -177,6 +177,7 @@ public:
     {
         std::string originalParameterName = parameterName;
         std::unordered_map<std::string, ParameterHandler>::const_iterator got = parameterHandlers.find(parameterName);
+        
         if ( got == parameterHandlers.end() )
         {
             DAEMON_LOG_ERROR("Handler not found");

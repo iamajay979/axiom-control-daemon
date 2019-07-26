@@ -10,7 +10,6 @@ int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue, s
 {
     switch(argc)
     {
-        std::cout<<argc<<std::endl;
     case 3:
         argv[3] =  const_cast<char*>("");
         break;
@@ -23,6 +22,7 @@ int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue, s
         secondValue = argv[5];
         break;
     case 7:
+        secondValue = argv[5];
         thirdValue = argv[6];
         break;
     case 8:
@@ -41,25 +41,64 @@ int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue, s
 
 int main(int argc, char *argv[])
 {
+    // TODO : Rework CLI code in a clean structure
     std::string secondValue = "";
     std::string thirdValue = "";
     std::string fourthValue = "";
-    std::cout<<"dasdasdas"<<std::endl;
+
     if(HandleCommandLine(argc, argv, secondValue, thirdValue, fourthValue) == 1)
     {
         return 0;
     }
-    std::cout<<"here"<<std::endl;
+
     MessageHandler messageHandler;
     std::unique_ptr<DaemonRequestT> req;
 
     if(std::string(argv[1]) == "i2c")
-    {                                   //./DaemonCLI   i2c0     get      i2c0     chip     data         value       mode
+    {   
+        //Allowed commands
+        // 1) DaemonCLI i2c get i2c* chipAddr 
+        // 2) DaemonCLI i2c get i2c* chipAddr dataAddr
+        // 3) DaemonCLI i2c get i2c* chipAddr dataAddr mode
+        // 4) DaemonCLI i2c set i2c* chipAddr dataAddr value
+        // 5) DaemonCLI i2c set i2c* chipAddr dataAddr value mode
+        if(argc < 5)
+        {
+            std::cout << "Not enough arguments" << std::endl;
+            return 0;
+        }
+        if(std::string(argv[2]) == "set" && argc < 7)
+        {
+            std::cout << "Not enough arguments" << std::endl;
+            return 0;
+        }
+        if(argc == 5)
+        {
+            secondValue = "-1"; //dataAddress
+            fourthValue = "b";  //mode
+        }
+        if(argc == 6)
+        {
+            fourthValue = "b"; //mode
+        }
+        if(argc == 7 && std::string(argv[2]) == "set")
+        {
+            fourthValue = "b"; //mode
+        }
+                                       //./DaemonCLI   i2c0     get      i2c0     chip     data         value       mode
         messageHandler.AddDaemonI2cRequest("DaemonCLI", argv[1], argv[2], argv[3], argv[4], secondValue, thirdValue, fourthValue);
         messageHandler.TransferData(req);
+
+        auto i2cPacket = req->data.AsI2cPacket();
+
+        std::cout << "--------" << std::endl << "Response" << std::endl;
+        std::cout << "Value: " << i2cPacket->value1 << std::endl;
+        std::cout << "Message: " << req.get()->header->message << std::endl;
+        std::cout << "--------" << std::endl;
+
     }
     
-    if(std::string(argv[1]) == "lut_conf")
+    else if(std::string(argv[1]) == "lut_conf")
     {   
         //create blob buffer
         std::ifstream lutConf(argv[4], std::ios::binary); 

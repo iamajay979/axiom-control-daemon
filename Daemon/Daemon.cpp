@@ -162,8 +162,8 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
         bool result = module->HandleBlobParameter(req->header->command, req->header->parameter, blobPacket->value, req->header->message);
     }
     else
-    { // I2cPacket
-        auto i2cPacket = req->data.AsI2cPacket();// get                  i2c0                  chip               data               value              mode                 message
+    {   // I2cPacket
+        auto i2cPacket = req->data.AsI2cPacket();// get                  i2c0                  chip               data               value              mode
         bool result = module->HandleI2cParameter(req->header->command, req->header->parameter, i2cPacket->value1, i2cPacket->value2, i2cPacket->value3, i2cPacket->value4, req.get()->header->message);
     }
    
