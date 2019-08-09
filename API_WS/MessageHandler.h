@@ -43,6 +43,8 @@ public:
 
     void Execute();
     void TransferData(std::unique_ptr<DaemonRequestT>& req);
+    std::vector<unsigned char> Base64Decode(std::string const& encoded_string);
+    bool IsBase64(unsigned char c);
 
     void AddDaemonStrParamRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::string& value1, const std::string& value2 = nullptr);
     void AddDaemonBlobRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::vector<uint8_t>& lut_buffer);

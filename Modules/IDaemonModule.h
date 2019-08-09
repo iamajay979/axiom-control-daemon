@@ -137,10 +137,16 @@ public:
             {
                 result = handler.Getter(parameterValue, message); 
             }
+            else
+            {
+                message = "Only `set` and `get` functions are allowed";
+                return false;
+            }
 
             return result;
         }
     }
+    
     bool HandleI2cParameter(std::string command, std::string parameterName, std::string& parameterValue1, std::string& parameterValue2, std::string& parameterValue3, std::string& parameterValue4, std::string& message)
     {
         std::string originalParameterName = parameterName;
@@ -165,19 +171,24 @@ public:
             }
             else if(command == "get")
             {   
-                std::cout<<"=========================="<<std::endl;
                 std::cout<<parameterValue1<<" "<<parameterValue2<<" "<<parameterValue3<<" "<<parameterValue4<<" "<<message<<std::endl;
                 result = handler.Getter(parameterValue1, parameterValue2, parameterValue3, parameterValue4, message);
+            }
+            else
+            {
+                message = "Only `set` and `get` functions are allowed";
+                return false;
             }
 
             return result;
         }
     }
+
     bool HandleParameter(std::string command, std::string parameterName, std::string& parameterValue1, std::string& parameterValue2, std::string& message)
     {
         std::string originalParameterName = parameterName;
         std::unordered_map<std::string, ParameterHandler>::const_iterator got = parameterHandlers.find(parameterName);
-        
+        std::cout<<"inside HandleParameter"<<std::endl;
         if ( got == parameterHandlers.end() )
         {
             DAEMON_LOG_ERROR("Handler not found");
@@ -199,11 +210,15 @@ public:
             {
                 result = handler.Getter(parameterValue1, message);
             }
+            else
+            {
+                message = "Only `set` and `get` functions are allowed";
+                return false;
+            }
 
             return result;
         }
     }
-
 };
 
 #endif //IDAEMONMODULE_H

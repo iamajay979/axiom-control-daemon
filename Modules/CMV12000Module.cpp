@@ -36,14 +36,14 @@ CMV12000Module::~CMV12000Module()
 
 bool CMV12000Module::SetAnalogGain(std::string gainValue, std::string, std::string& message)
 {
-    if(gainValue.length() > 1)
+    if(gainValue.length() > 1) //Handle negative numbers
     {
         message = "SetGain() | Gain out of range 0 -> 4";
         return false;
     }
 
     _analogGainValue = static_cast<unsigned int>(stoi(gainValue));
-    if(_analogGainValue > 7)
+    if(_analogGainValue > 7) //Handle beyond range 
     {
         // TODO: Log error for unsuitable parameter
         message = "SetAnalogGain() | Gain index out of range 0 -> 7";
@@ -68,7 +68,7 @@ bool CMV12000Module::SetDigitalGain(std::string gainValue, std::string, std::str
 {
     _digitalGainValue = static_cast<unsigned int>(stoi(gainValue));
     // TODO: Add handling of 3/3 gain value
-    if(_digitalGainValue > 9)
+    if(_digitalGainValue > 9 || _digitalGainValue < 0)
     {
         // TODO: Log error for unsuitable parameter
         message = "SetDigitalgGain() | Gain index out of range 0 -> 9";

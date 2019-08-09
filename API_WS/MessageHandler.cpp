@@ -67,7 +67,8 @@ MessageHandler::~MessageHandler()
 }
 
 bool MessageHandler::ProcessMessage(std::string message, std::string& response)
-{
+{   
+
     ns::JSONSetting setting;
     try
     {
@@ -78,8 +79,10 @@ bool MessageHandler::ProcessMessage(std::string message, std::string& response)
         response = "Invalid format";
         return false;
     }
+    
 
     //change these to according to  new packet
+    // auto vec = Base64Decode(message); 
 
     // AddDaemonStrParamRequest(setting.sender, setting.module, setting.command, setting.parameter, setting.value1, setting.value2);
     // std::unique_ptr<DaemonRequestT> req;
@@ -104,6 +107,76 @@ void MessageHandler::Execute()
     // TODO: Implement packet to trigger applying/retrieving of settings sent to daemon
 }
 
+bool MessageHandler::IsBase64(unsigned char c)
+{
+    return (isalnum(c) || (c == '+') || (c == '/'));
+}
+
+
+std::vector<unsigned char> MessageHandler::Base64Decode(std::string const& encodedStr)
+{   
+
+    std::cout<<encodedStr<<" encoded string heree 1"<<std::endl;
+
+    static const std::string base64_chars = 
+                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                 "abcdefghijklmnopqrstuvwxyz"
+                 "0123456789+/";
+
+    int inpLen = encodedStr.size();
+    int i = 0;
+    int j = 0;
+    int index = 0;
+    unsigned char tempArray1[4], tempArray2[3];
+    std::vector<unsigned char> ret;
+
+    while( inpLen-- && ( encodedStr[index] != '=' ) && IsBase64( encodedStr[index]) )
+    {
+        tempArray1[i++] = encodedStr[index]; index++;
+
+        if(i == 4)
+        {
+            for (i = 0; i <4; i++)
+            {
+                tempArray1[i] = base64_chars.find(tempArray1[i]);
+            }
+
+            tempArray2[0] = (tempArray1[0] << 2) + ((tempArray1[1] & 0x30) >> 4);
+            tempArray2[1] = ((tempArray1[1] & 0xf) << 4) + ((tempArray1[2] & 0x3c) >> 2);
+            tempArray2[2] = ((tempArray1[2] & 0x3) << 6) + tempArray1[3];
+
+            for (i = 0; (i < 3); i++)
+            {
+              ret.push_back(tempArray2[i]);
+            }
+
+            i = 0;
+        }
+    }
+
+    if(i)
+    {
+        for (j = i; j <4; j++)
+        {
+            tempArray1[j] = 0;
+        }
+        for (j = 0; j <4; j++)
+        {
+            tempArray1[j] = base64_chars.find(tempArray1[j]);
+        }
+    
+        tempArray2[0] = (tempArray1[0] << 2) + ((tempArray1[1] & 0x30) >> 4);
+        tempArray2[1] = ((tempArray1[1] & 0xf) << 4) + ((tempArray1[2] & 0x3c) >> 2);
+        tempArray2[2] = ((tempArray1[2] & 0x3) << 6) + tempArray1[3];
+        
+        for (j = 0; (j < i - 1); j++)
+        {
+            ret.push_back(tempArray2[j]);
+        }
+    }
+    return ret;
+}
+
 void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
 {
     std::cout << "TransferData() started" << std::endl;
@@ -124,7 +197,6 @@ void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
         std::cout << "RECEIVE ERROR: " << strerror(errno) << std::endl;
         close(clientSocket);
         exit(1);
-        //std::cout << "Response received" << std::enerrnodl;
     }
 
     req = UnPackDaemonRequest(_response);//DaemonRequest::UnPack(req, receivedBuffer);
