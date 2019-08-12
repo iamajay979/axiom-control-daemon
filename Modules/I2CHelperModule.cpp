@@ -68,7 +68,10 @@ bool I2CHelperModule::SetI2C2(const std::string chipAddress, const std::string d
 bool I2CHelperModule::GetI2C0(const std::string chipAddress, const std::string dataAddress, std::string &value, const std::string mode, std::string& message)
 {
         int res;
-        if(dataAddress == ""){std::cout<<"data address not found" ;return false;}
+        if(dataAddress == "")//remove these after testing
+        {
+                std::cout<<"data address not found" ;return false;
+        }
         res = _i2cAdapter->I2cGet("0", chipAddress, dataAddress, mode[0], message);
 
         if(res < 0)
@@ -84,7 +87,11 @@ bool I2CHelperModule::GetI2C0(const std::string chipAddress, const std::string d
 bool I2CHelperModule::GetI2C1(const std::string chipAddress, const std::string dataAddress, std::string &value, const std::string mode, std::string& message)
 {
         int res;
-        if(dataAddress == ""){std::cout<<"data address not found" ;return false;}
+        if(dataAddress == "")
+        {
+                std::cout<<"data address not found" ;return false;
+        }
+
         res = _i2cAdapter->I2cGet("1", chipAddress, dataAddress, mode[0], message);
 
         if(res < 0)
@@ -100,7 +107,11 @@ bool I2CHelperModule::GetI2C1(const std::string chipAddress, const std::string d
 bool I2CHelperModule::GetI2C2(const std::string chipAddress, const std::string dataAddress, std::string &value, const std::string mode, std::string& message)
 {
         int res;
-        if(dataAddress == ""){std::cout<<"data address not found" ;return false;}
+        if(dataAddress == "")
+        {
+                std::cout<<"data address not found" ;return false;
+        }
+        
         res = _i2cAdapter->I2cGet("2", chipAddress, dataAddress, mode[0], message);
 
         if(res < 0)
