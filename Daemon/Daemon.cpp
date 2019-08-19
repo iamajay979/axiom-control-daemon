@@ -155,13 +155,20 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
     {   
         auto strParamPacket = req->data.AsStrParamPacket();
         bool result = module->HandleParameter(req->header->command, req->header->parameter, strParamPacket->value1, strParamPacket->value2, req.get()->header->message);
+        
+        std::cout<<"types here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<std::endl;
+        std::cout<<typeid(req.get()->header->message).name()<<std::endl;
+        std::cout<<typeid(req->header->parameter).name()<<std::endl;
+        std::cout<<typeid(strParamPacket->value1).name()<<std::endl;
+        std::cout<<"types here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<std::endl;
+
     }
     else if (union_type == PacketData::BlobPacket)
     {   
         auto blobPacket = req->data.AsBlobPacket();
         bool result = module->HandleBlobParameter(req->header->command, req->header->parameter, blobPacket->value, req->header->message);
     }
-    else
+    else //TODO :: Test if we can correctly get the value when get command is used , as it's not used by value
     {   // I2cPacket
         auto i2cPacket = req->data.AsI2cPacket();// get                  i2c0                  chip               data               value              mode
         bool result = module->HandleI2cParameter(req->header->command, req->header->parameter, i2cPacket->value1, i2cPacket->value2, i2cPacket->value3, i2cPacket->value4, req.get()->header->message);
@@ -204,11 +211,12 @@ bool Daemon::ProcessGeneralRequest(std::unique_ptr<DaemonRequestT> &req)
             req.get()->header->timestamp = GetCurrentTimestamp();
         }
     }
+
     else if (union_type == PacketData::BlobPacket)
     {
         // handle generalblob request if any in future
-        // std::cout<<"Handling for blob packet not found"<<std::endl;
     }
+
     else
     {
         // handle for general I2cRequest if any in future;

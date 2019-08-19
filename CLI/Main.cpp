@@ -6,7 +6,7 @@
 #include "json/json.hpp"
 using json = nlohmann::json;
 
-int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue, std::string& thirdValue, std::string& fourthValue)
+int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue)
 {
     switch(argc)
     {
@@ -21,18 +21,97 @@ int HandleCommandLine(const int& argc, char* argv[], std::string& secondValue, s
     case 6:
         secondValue = argv[5];
         break;
-    case 7:
-        secondValue = argv[5];
-        thirdValue = argv[6];
-        break;
-    case 8:
-        fourthValue = argv[7];
-        break;
     default:
         std::cout << "Not enough arguments." << std::endl;
         std::cout << "Example 1: ./DaemonCLI image_sensor get analog_gain" << std::endl;
         std::cout << "Example 2: ./DaemonCLI image_sensor set analog_gain 2" << std::endl;
         std::cout << "Example 3: ./DaemonCLI image_sensor set config_register 115 11" << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+// Used different method as in different types of requests the positional parameters have different meaning, also incase if the command given is wrong then examples 
+// of only that module will be given
+int HandleCommandLineI2C(const int& argc, char* argv[], std::string& secondValue, std::string& thirdValue, std::string& fourthValue)
+{
+    switch(argc)
+    {
+    case 5:
+        if(std::string(argv[2]) == "get")
+        {
+            secondValue = "-1"; //dataAddress
+            fourthValue = "b";  //mode (byte is default)
+        }
+        else
+        {
+            std::cout << "Invalid Command" << std::endl;
+            std::cout << "Example 1: ./DaemonCLI i2c get busAddr chipAddr" << std::endl;
+            return 1;
+        }
+        break;
+    case 6:
+        if(std::string(argv[2]) == "get")
+        {
+            if(std::string(argv[5]) == "b" || std::string(argv[5]) == "w") // Command of type : "DaemonCLI i2c get i2c# chipAddr mode" 
+            {
+                secondValue = "-1"; //dataAddress
+                fourthValue = argv[5]; //mode
+            }
+            else // Command of type : "DaemonCLI i2c get i2c# chipAddr dataAddr"
+            {
+                secondValue = argv[5]; //dataAddress
+                fourthValue = "b"; //mode
+            }
+        }
+        else
+        {
+            std::cout << "Invalid Command" << std::endl;
+            std::cout << "Example 1: ./DaemonCLI i2c get busAddr chipAddr mode" << std::endl;
+            std::cout << "Example 2: ./DaemonCLI i2c get busAddr chipAddr dataAddress" << std::endl;
+        }
+        break;
+    case 7:
+        if(std::string(argv[2]) == "get")
+        {
+            secondValue = argv[5]; //dataAddress
+            fourthValue = argv[6]; //mode 
+        }
+        else if(std::string(argv[2]) == "set")
+        {
+            secondValue = argv[5]; //dataAddress
+            thirdValue = argv[6]; //value
+            fourthValue = "b"; //mode
+        }
+        else
+        {
+            std::cout << "Invalid Command" << std::endl;
+            std::cout << "Example 1: ./DaemonCLI i2c get busAddr chipAddr dataAddress mode" << std::endl;
+            std::cout << "Example 2: ./DaemonCLI i2c set busAddr chipAddr dataAddress value" << std::endl;
+        }
+        break;
+    case 8:
+        if(std::string(argv[2]) == "set")
+        {
+            secondValue = argv[5];
+            thirdValue = argv[6];
+            fourthValue = argv[7];
+        }
+        else
+        {
+            std::cout << "Invalid Command" << std::endl;
+            std::cout << "Example 1: ./DaemonCLI i2c set busAddr chipAddr dataAddress value mode" << std::endl;
+        }
+        break;
+    default:
+        std::cout << "Not enough arguments." << std::endl;
+        std::cout << "Example 1: ./DaemonCLI i2c get busAddr chipAddr" << std::endl;
+        std::cout << "Example 2: ./DaemonCLI i2c get busAddr chipAddr mode " << std::endl;
+        std::cout << "Example 3: ./DaemonCLI i2c get busAddr chipAddr dataAddr" << std::endl;
+        std::cout << "Example 4: ./DaemonCLI i2c set busAddr chipAddr dataAddr value" << std::endl;
+        std::cout << "Example 5: ./DaemonCLI i2c set busAddr chipAddr dataAddr value mode" << std::endl;
+
         return 1;
     }
 
@@ -46,46 +125,30 @@ int main(int argc, char *argv[])
     std::string thirdValue = "";
     std::string fourthValue = "";
 
-    if(HandleCommandLine(argc, argv, secondValue, thirdValue, fourthValue) == 1)
-    {
-        return 0;
-    }
+    // if(HandleCommandLine(argc, argv, secondValue, thirdValue, fourthValue) == 1)
+    // {
+    //     return 0;
+    // }
 
     MessageHandler messageHandler;
     std::unique_ptr<DaemonRequestT> req;
 
     if(std::string(argv[1]) == "i2c")
     {   
-        //Allowed commands
-        // 1) DaemonCLI i2c get i2c* chipAddr 
-        // 2) DaemonCLI i2c get i2c* chipAddr dataAddr
-        // 3) DaemonCLI i2c get i2c* chipAddr dataAddr mode
-        // 4) DaemonCLI i2c set i2c* chipAddr dataAddr value
-        // 5) DaemonCLI i2c set i2c* chipAddr dataAddr value mode
-        if(argc < 5)
+        //Allowed commands for now
+
+        // 1) DaemonCLI i2c get i2c# chipAddr 
+        // 2) DaemonCLI i2c get i2c# chipAddr mode 
+        // 2) DaemonCLI i2c get i2c# chipAddr dataAddr
+        // 3) DaemonCLI i2c get i2c# chipAddr dataAddr mode
+        // 4) DaemonCLI i2c set i2c# chipAddr dataAddr value
+        // 5) DaemonCLI i2c set i2c# chipAddr dataAddr value mode
+
+        if(HandleCommandLineI2C(argc, argv, secondValue, thirdValue, fourthValue) == 1)
         {
-            std::cout << "Not enough arguments" << std::endl;
             return 0;
         }
-        if(std::string(argv[2]) == "set" && argc < 7)
-        {
-            std::cout << "Not enough arguments" << std::endl;
-            return 0;
-        }
-        if(argc == 5)
-        {
-            secondValue = "-1"; //dataAddress
-            fourthValue = "b";  //mode
-        }
-        if(argc == 6)
-        {
-            fourthValue = "b"; //mode
-        }
-        if(argc == 7 && std::string(argv[2]) == "set")
-        {
-            fourthValue = "b"; //mode
-        }
-                                       //./DaemonCLI   i2c0     get      i2c0     chip     data         value       mode
+                                       //./DaemonCLI       i2c    get      i2c0     chip     data         value       mode
         messageHandler.AddDaemonI2cRequest("DaemonCLI", argv[1], argv[2], argv[3], argv[4], secondValue, thirdValue, fourthValue);
         messageHandler.TransferData(req);
 
@@ -112,8 +175,14 @@ int main(int argc, char *argv[])
         std::cout << "Message: " << req.get()->header->message << std::endl;
         std::cout << "--------" << std::endl;
     }
+
     else
     {   
+        if(HandleCommandLine(argc, argv, secondValue) == 1)
+        {
+            return 0;
+        }
+
         messageHandler.AddDaemonStrParamRequest("DaemonCLI", argv[1], argv[2], argv[3], argv[4], secondValue);
         messageHandler.TransferData(req);
         
