@@ -139,9 +139,9 @@ int main(int argc, char *argv[])
 
         // 1) DaemonCLI i2c get i2c# chipAddr 
         // 2) DaemonCLI i2c get i2c# chipAddr mode 
-        // 2) DaemonCLI i2c get i2c# chipAddr dataAddr
-        // 3) DaemonCLI i2c get i2c# chipAddr dataAddr mode
-        // 4) DaemonCLI i2c set i2c# chipAddr dataAddr value
+        // 2) DaemonCLI i2c get i2c# chipAddr dataAddr 
+        // 3) DaemonCLI i2c get i2c# chipAddr dataAddr mode 
+        // 4) DaemonCLI i2c set i2c# chipAddr dataAddr value 
         // 5) DaemonCLI i2c set i2c# chipAddr dataAddr value mode
 
         if(HandleCommandLineI2C(argc, argv, secondValue, thirdValue, fourthValue) == 1)
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
         auto i2cPacket = req->data.AsI2cPacket();
 
         std::cout << "--------" << std::endl << "Response" << std::endl;
-        std::cout << "Value: " << i2cPacket->value1 << std::endl;
+        std::cout << "Value: " << i2cPacket->value3 << std::endl;
         std::cout << "Message: " << req.get()->header->message << std::endl;
         std::cout << "--------" << std::endl;
 
