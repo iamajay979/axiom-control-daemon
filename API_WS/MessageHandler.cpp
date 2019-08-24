@@ -5,6 +5,9 @@
 #include <unistd.h>
 
 #include <json/json.hpp>
+
+#define BUFFER_MAX 163840
+
 using json = nlohmann::json;
 
 namespace ns
@@ -64,7 +67,8 @@ MessageHandler::~MessageHandler()
 }
 
 bool MessageHandler::ProcessMessage(std::string message, std::string& response)
-{
+{   
+
     ns::JSONSetting setting;
     try
     {
@@ -75,15 +79,21 @@ bool MessageHandler::ProcessMessage(std::string message, std::string& response)
         response = "Invalid format";
         return false;
     }
+    
 
-    AddDaemonRequest(setting.sender, setting.module, setting.command, setting.parameter, setting.value1, setting.value2);
-    std::unique_ptr<DaemonRequestT> req;
-    TransferData(req);
+    //change these to according to  new packet
+    // auto vec = Base64Decode(message); 
 
-    setting.value1 = req.get()->value1;
-    setting.value2 = req.get()->value2;
-    setting.message = req.get()->message;
-    setting.status = req.get()->status;
+    // AddDaemonStrParamRequest(setting.sender, setting.module, setting.command, setting.parameter, setting.value1, setting.value2);
+    // std::unique_ptr<DaemonRequestT> req;
+    // TransferData(req);
+
+    //Change here for new schema
+    
+    // setting.value1 = req.get()->value1;
+    // setting.value2 = req.get()->value2;
+    // setting.message = req.get()->message;
+    // setting.status = req.get()->status;
     //setting.timestamp = req.get()->timestamp;
 
     json j = setting;
@@ -97,6 +107,76 @@ void MessageHandler::Execute()
     // TODO: Implement packet to trigger applying/retrieving of settings sent to daemon
 }
 
+bool MessageHandler::IsBase64(unsigned char c)
+{
+    return (isalnum(c) || (c == '+') || (c == '/'));
+}
+
+
+std::vector<unsigned char> MessageHandler::Base64Decode(std::string const& encodedStr)
+{   
+
+    std::cout<<encodedStr<<" encoded string heree 1"<<std::endl;
+
+    static const std::string base64_chars = 
+                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                 "abcdefghijklmnopqrstuvwxyz"
+                 "0123456789+/";
+
+    int inpLen = encodedStr.size();
+    int i = 0;
+    int j = 0;
+    int index = 0;
+    unsigned char tempArray1[4], tempArray2[3];
+    std::vector<unsigned char> ret;
+
+    while( inpLen-- && ( encodedStr[index] != '=' ) && IsBase64( encodedStr[index]) )
+    {
+        tempArray1[i++] = encodedStr[index]; index++;
+
+        if(i == 4)
+        {
+            for (i = 0; i <4; i++)
+            {
+                tempArray1[i] = base64_chars.find(tempArray1[i]);
+            }
+
+            tempArray2[0] = (tempArray1[0] << 2) + ((tempArray1[1] & 0x30) >> 4);
+            tempArray2[1] = ((tempArray1[1] & 0xf) << 4) + ((tempArray1[2] & 0x3c) >> 2);
+            tempArray2[2] = ((tempArray1[2] & 0x3) << 6) + tempArray1[3];
+
+            for (i = 0; (i < 3); i++)
+            {
+              ret.push_back(tempArray2[i]);
+            }
+
+            i = 0;
+        }
+    }
+
+    if(i)
+    {
+        for (j = i; j <4; j++)
+        {
+            tempArray1[j] = 0;
+        }
+        for (j = 0; j <4; j++)
+        {
+            tempArray1[j] = base64_chars.find(tempArray1[j]);
+        }
+    
+        tempArray2[0] = (tempArray1[0] << 2) + ((tempArray1[1] & 0x30) >> 4);
+        tempArray2[1] = ((tempArray1[1] & 0xf) << 4) + ((tempArray1[2] & 0x3c) >> 2);
+        tempArray2[2] = ((tempArray1[2] & 0x3) << 6) + tempArray1[3];
+        
+        for (j = 0; (j < i - 1); j++)
+        {
+            ret.push_back(tempArray2[j]);
+        }
+    }
+    return ret;
+}
+
 void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
 {
     std::cout << "TransferData() started" << std::endl;
@@ -104,21 +184,23 @@ void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
     _builder->Finish(_settings[0]);
     
     //send(clientSocket, _builder->GetBufferPointer(), _builder->GetSize(), 0);
+    int response = sendto(clientSocket, _builder->GetBufferPointer(), _builder->GetSize(), 0, reinterpret_cast<struct sockaddr*>(&address), _sockaddrLength);
+    if(response == -1)
+    {
+        std::cout<<"Error No : "<<errno<<std::endl;
+        return ;
+    }
 
-    sendto(clientSocket, _builder->GetBufferPointer(), _builder->GetSize(), 0, reinterpret_cast<struct sockaddr*>(&address), _sockaddrLength);
-    ssize_t i = recvfrom(clientSocket, &_response, 2047, 0, reinterpret_cast<struct sockaddr*>(&address), &_sockaddrLength);
+    ssize_t i = recvfrom(clientSocket, &_response, BUFFER_MAX, 0, reinterpret_cast<struct sockaddr*>(&address), &_sockaddrLength);
     if(i < 0)
     {
         std::cout << "RECEIVE ERROR: " << strerror(errno) << std::endl;
         close(clientSocket);
         exit(1);
-        //std::cout << "Response received" << std::enerrnodl;
     }
 
-
     req = UnPackDaemonRequest(_response);//DaemonRequest::UnPack(req, receivedBuffer);
-    std::cout << "RESPONSE MESSAGE: " << req.get()->status << std::endl;
-
+    std::cout << "RESPONSE MESSAGE: " << req.get()->header->status << std::endl;
     std::string message = "Data size: " + std::to_string(_builder->GetSize());
     std::cout << message.c_str() << std::endl;
     
@@ -128,8 +210,8 @@ void MessageHandler::TransferData(std::unique_ptr<DaemonRequestT>& req)
 
     std::cout << "TransferData() completed" << std::endl;
 
-    std::cout << "Response (message): " << req.get()->message << std::endl;
-    std::cout << "Response (status): " << req.get()->status << std::endl;
+    std::cout << "Response (message): " << req.get()->header->message << std::endl;
+    std::cout << "Response (status): " << req.get()->header->status << std::endl;
 }
 
 void MessageHandler::SetupSocket()
@@ -147,16 +229,72 @@ void MessageHandler::SetupSocket()
     }
 }
 
-void MessageHandler::AddDaemonRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string& parameter, const std::string& value1, const std::string& value2)
+void MessageHandler::AddDaemonBlobRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::vector<uint8_t>& lut_buffer)
 {
     DaemonRequestT request;
-    request.sender = sender;
-    request.module_ = module;
-    request.command = command;
-    request.parameter = parameter;
-    request.value1 = value1;
-    request.value2 = value2;
+    HeaderT header;
+    BlobPacketT blobPacket;
 
-    auto req = CreateDaemonRequest(*_builder, &request);
+    header.sender = sender;
+    header.module_ = module;
+    header.command = command;
+    header.parameter = parameter;
+
+    auto headerOffset = CreateHeader(*_builder, &header);
+
+    blobPacket.value = lut_buffer;
+
+    auto blobPacketOffset = CreateBlobPacket(*_builder, &blobPacket);
+
+    auto req = CreateDaemonRequest(*_builder, headerOffset, PacketData::BlobPacket, blobPacketOffset.Union());
+    _settings.push_back(req);
+}
+
+void MessageHandler::AddDaemonStrParamRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string& parameter, const std::string& value1, const std::string& value2)
+{   
+    DaemonRequestT request;
+    HeaderT header;
+    StrParamPacketT strParamPacket;
+
+    header.sender = sender;
+    header.module_ = module;
+    header.command = command;
+    header.parameter = parameter;
+
+    auto headerOffset = CreateHeader(*_builder, &header);
+
+    strParamPacket.value1 = value1;
+    strParamPacket.value2 = value2;
+
+    auto strParamPacketOffset = CreateStrParamPacket(*_builder, &strParamPacket);
+
+    auto req = CreateDaemonRequest(*_builder, headerOffset, PacketData::StrParamPacket, strParamPacketOffset.Union());
+
+    _settings.push_back(req);
+
+}
+
+void MessageHandler::AddDaemonI2cRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::string& value1, const std::string& value2, const std::string& value3, const std::string& value4)
+{
+    DaemonRequestT request;
+    HeaderT header;
+    I2cPacketT i2cPacket;
+
+    header.sender = sender;
+    header.module_ = module;
+    header.command = command;
+    header.parameter = parameter;
+
+    auto headerOffset = CreateHeader(*_builder, &header);
+
+    i2cPacket.value1 = value1;
+    i2cPacket.value2 = value2;
+    i2cPacket.value3 = value3;
+    i2cPacket.value4 = value4;
+
+    auto i2cPacketOffset = CreateI2cPacket(*_builder, &i2cPacket);
+
+    auto req = CreateDaemonRequest(*_builder, headerOffset, PacketData::I2cPacket, i2cPacketOffset.Union());
+
     _settings.push_back(req);
 }

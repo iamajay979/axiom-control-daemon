@@ -221,7 +221,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		message = "Error : Invalid argument";
 		return -1;
 	}
-	if (i2cbus > 0xFFFFF)
+	if (i2cbus > 0xFFFFF)  // Reference --> lookup_i2c_bus() in https://fossies.org/linux/i2c-tools/tools/i2cbusses.c
 	{
 		message = "Error : I2C bus out of range ";
 		return -1;
@@ -233,7 +233,7 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 		message = "Error : Invalid argument";
 		return -1;	
 	}
-	if(chipAddress < 0x03 || chipAddress > 0x77) //Replace them with const var ?
+	if(chipAddress < 0x03 || chipAddress > 0x77) //Replace them with const var ?  :: Reference --> parse_i2c_address in https://fossies.org/linux/i2c-tools/tools/i2cbusses.c
 	{
 		message = " Error : Chip Address out of range ";
 		return -1;
@@ -252,16 +252,19 @@ int I2CAdapter::I2cSet(std::string i2cbusArg, std::string chipAddressArg,std::st
 	}
 
 	value = StrToInt(valueArg);
+
 	if(value < 0)
 	{
 		message = "Error : Invalid argument";
 		return -1;
 	}
+
 	if(mode == 'b' && (value > 0xFF || value < 0))
 	{
 		message = "Error: Data value invalid! ";
+		return -1;
 	}
-	if(mode == 'w' && (value > 0xFFFFF || value < 0))
+	if(mode == 'w' && (value > 0xFFFF || value < 0))
 	{
 		message = "Error: Data value invalid! ";
 		return -1;

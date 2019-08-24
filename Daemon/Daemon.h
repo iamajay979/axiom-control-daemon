@@ -14,6 +14,8 @@ using json = nlohmann::json;
 #include "../Modules/CMV12000Module.h"
 #include "../Modules/EnvironmentModule.h"
 #include "../Modules/I2CTestModule.h"
+#include "../Modules/I2CHelperModule.h"
+#include "../Modules/LutConfModule.h"
 #include <Schema/axiom_daemon_generated.h>
 
 class ILogger;

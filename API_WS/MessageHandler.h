@@ -9,6 +9,7 @@
 
 #include <Schema/axiom_daemon_generated.h>
 
+#define BUFFER_MAX 163840
 namespace ns
 {
 struct JSONSetting;
@@ -22,7 +23,7 @@ class MessageHandler : public IMessageHandler
     socklen_t _sockaddrLength;
 
     // TODO (BAndiT1983): Rework, possibly shrink it, as the data is much smaller currently
-    char _response[2048];
+    char _response[BUFFER_MAX];
     
     // Using separate lists for now as it seems that flatbuffers does not use inheritance for unions
     std::vector<flatbuffers::Offset<DaemonRequest>> _settings;
@@ -42,9 +43,12 @@ public:
 
     void Execute();
     void TransferData(std::unique_ptr<DaemonRequestT>& req);
+    std::vector<unsigned char> Base64Decode(std::string const& encoded_string);
+    bool IsBase64(unsigned char c);
 
-    void AddDaemonRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::string& value1, const std::string& value2 = nullptr);
-
+    void AddDaemonStrParamRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::string& value1, const std::string& value2 = nullptr);
+    void AddDaemonBlobRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::vector<uint8_t>& lut_buffer);
+    void AddDaemonI2cRequest(const std::string& sender, const std::string& module, const std::string& command, const std::string &parameter, const std::string& value1, const std::string& value2, const std::string& value3, const std::string& value4);
     void OutputReceivedData(ns::JSONSetting setting, std::string& message);
 };
 

@@ -7,6 +7,8 @@
 
 #include "../Log/DefaultLogger.h"
 
+#define BUFFER_MAX 163840
+
 std::string GetCurrentTimestamp()
 {
     auto now = std::chrono::system_clock::now();
@@ -33,7 +35,8 @@ Daemon::Daemon() :
     _modules["temperatures"] = std::make_shared<EnvironmentModule>();
     _modules["voltages"] = std::make_shared<EnvironmentModule>();
     _modules["i2c_test"] = std::make_shared<I2CTestModule>();
-
+    _modules["lut_conf"] = std::make_shared<LutConfModule>();
+    _modules["i2c"] = std::make_shared<I2CHelperModule>();
     // TODO (BAndiT1983): Add real reading of revision/version
     //std::string/int?? revision = ReadRevision();
     //std::string revision = "29";
@@ -89,7 +92,7 @@ void Daemon::Process()
 
 void Daemon::ProcessClient(int socket)
 {
-    uint8_t* receivedBuffer = new uint8_t[1024];
+    uint8_t* receivedBuffer = new uint8_t[BUFFER_MAX];
     std::cout << "NEW CLIENT" << std::endl;
     std::cout << "Socket: " << socket << std::endl;
 
@@ -102,7 +105,7 @@ void Daemon::ProcessClient(int socket)
         }
 
         // Wait for packets to arrive
-        ssize_t size = RetrieveIncomingData(socket, receivedBuffer, 1024);
+        ssize_t size = RetrieveIncomingData(socket, receivedBuffer, BUFFER_MAX);
         if(size <= 0)
         {
             return;
@@ -110,13 +113,13 @@ void Daemon::ProcessClient(int socket)
 
         std::cout << "Received buffer size: " << receivedBuffer << std::endl;
         ProcessReceivedData(receivedBuffer);
-
         ssize_t error = send(socket, _builder.GetBufferPointer(), _builder.GetSize(), 0);
         if(error < 0)
         {
             std::cout << "Error while sending response." << std::endl;
             printf("SEND ERROR = %s\n", strerror(errno));
         }
+    _builder.Clear();
     }
 }
 
@@ -124,8 +127,7 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
 {
     auto req= UnPackDaemonRequest(receivedBuffer);//req is an object that is made from the buffer via UnPackDaemonRequest
 
-    std::string moduleName = req.get()->module_;
-
+    std::string moduleName = req.get()->header->module_;
     if(moduleName == "general")
     {
         ProcessGeneralRequest(req);
@@ -141,46 +143,84 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
     {
         message = "Received: Unknown module";
         DAEMON_LOG_INFO("Received: Unknown module");
-        req.get()->message = message;
+        req.get()->header->message = message;
         _builder.Finish(CreateDaemonRequest(_builder, req.get()));
         return;
     }
 
     auto module = _module_iterator->second;
+    auto union_type = req->data.type;
 
-    std::string value = req->value1;
+    if (union_type == PacketData::StrParamPacket) 
+    {   
+        auto strParamPacket = req->data.AsStrParamPacket();
+        bool result = module->HandleParameter(req->header->command, req->header->parameter, strParamPacket->value1, strParamPacket->value2, req.get()->header->message);
+        
+        //Remove after checking
+        // std::cout<<"types here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<std::endl;
+        // std::cout<<typeid(req.get()->header->message).name()<<std::endl;
+        // std::cout<<typeid(req->header->parameter).name()<<std::endl;
+        // std::cout<<typeid(strParamPacket->value1).name()<<std::endl;
+        // std::cout<<"types here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<std::endl;
 
-    bool result = module->HandleParameter(req->command, req->parameter, req.get()->value1, req.get()->value2, req.get()->message);
-
+    }
+    else if (union_type == PacketData::BlobPacket)
+    {   
+        auto blobPacket = req->data.AsBlobPacket();
+        bool result = module->HandleBlobParameter(req->header->command, req->header->parameter, blobPacket->value, req->header->message);
+    }
+    else //TODO :: Test if we can correctly get the value when get command is used , as it's not used by value
+    {   // I2cPacket
+        auto i2cPacket = req->data.AsI2cPacket();// get                  i2c0                  chip               data               value              mode
+        bool result = module->HandleI2cParameter(req->header->command, req->header->parameter, i2cPacket->value1, i2cPacket->value2, i2cPacket->value3, i2cPacket->value4, req.get()->header->message);
+    }
+   
     // TODO (BAndiT1983):Check if assignments are really required, or if it's suitable of just passing reference to req attirbutes
-    req.get()->status = (result == true) ? "STATUS_SUCCESS" : "STATUS_FAIL";
-    req.get()->timestamp = GetCurrentTimestamp();
-
+    bool result = true;
+    req.get()->header->status = (result == true) ? "STATUS_SUCCESS" : "STATUS_FAIL";
+    req.get()->header->timestamp = GetCurrentTimestamp();
     _builder.Finish(CreateDaemonRequest(_builder, req.get()));
+
 }
 
 bool Daemon::ProcessGeneralRequest(std::unique_ptr<DaemonRequestT> &req)
-{
+{   
     bool result = false;
-    req.get()->status = "fail";
+    req.get()->header->status = "fail";
+    auto union_type = req->data.type; 
 
-    if(req.get()->command == "get" && req.get()->parameter == "available_parameters")
+    if (union_type == PacketData::StrParamPacket) 
     {
-        ProcessAvailableParameters(std::bind(&Daemon::RetrieveCurrentParameterValues, this, std::placeholders::_1, std::placeholders::_2));
+        auto strParamPacket = req->data.AsStrParamPacket();
+    
+        if(req.get()->header->command == "get" && req.get()->header->parameter == "available_parameters")
+        {
+            ProcessAvailableParameters(std::bind(&Daemon::RetrieveCurrentParameterValues, this, std::placeholders::_1, std::placeholders::_2));
 
-        req.get()->value1 = availableParameters.dump();
-        req.get()->message = "";
-        req.get()->status = "success";
-        req.get()->timestamp = GetCurrentTimestamp();
+            strParamPacket->value1 = availableParameters.dump();
+            req.get()->header->message = "";
+            req.get()->header->status = "success";
+            req.get()->header->timestamp = GetCurrentTimestamp();
+        }
+        else if(req.get()->header->command == "reset")
+        {
+            ProcessAvailableParameters(std::bind(&Daemon::ResetParameterValues, this, std::placeholders::_1, std::placeholders::_2));
+
+            strParamPacket->value1 = availableParameters.dump();
+            req.get()->header->message = "";
+            req.get()->header->status = "success";
+            req.get()->header->timestamp = GetCurrentTimestamp();
+        }
     }
-    else if(req.get()->command == "reset")
-    {
-        ProcessAvailableParameters(std::bind(&Daemon::ResetParameterValues, this, std::placeholders::_1, std::placeholders::_2));
 
-        req.get()->value1 = availableParameters.dump();
-        req.get()->message = "";
-        req.get()->status = "success";
-        req.get()->timestamp = GetCurrentTimestamp();
+    else if (union_type == PacketData::BlobPacket)
+    {
+        // handle generalblob request if any in future
+    }
+
+    else
+    {
+        // handle for general I2cRequest if any in future;
     }
 
     return result;
