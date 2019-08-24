@@ -44,7 +44,7 @@ void LutConfModule::ParseValues (std::vector<uint8_t>& lutBuffer, std::vector<in
 			{
 				values[count] = stoi(temp);
 
-				std::cout<<values[count]<<std::endl;
+				// std::cout<<values[count]<<std::endl;
 			}
 			catch(const std::invalid_argument& ia)
 			{
@@ -59,7 +59,7 @@ void LutConfModule::ParseValues (std::vector<uint8_t>& lutBuffer, std::vector<in
 			temp += lutBuffer[i];
 		}
 	}
-	std::cout<<count<<std::endl;
+	// std::cout<<count<<std::endl;
 	try
 	{
 		values[count] = stoi(temp);
@@ -77,7 +77,6 @@ bool LutConfModule::SetLut(std::vector<uint8_t>& lutBuffer, std::string& message
 
 	for(unsigned int i = 0; i < values.size(); i++)
 	{
-		// std::cout<<values[i]<<std::endl;
 		_memoryAdapter->WriteWord(i, values[i]);
 	}
 	return true;

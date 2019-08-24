@@ -131,7 +131,6 @@ public:
             if(command == "set")
             {   
                 result = handler.Setter(parameterValue, message); 
-                // std::cout<<result<<std::endl;
             }
             else if(command == "get")
             {
@@ -171,7 +170,6 @@ public:
             }
             else if(command == "get")
             {   
-                std::cout<<parameterValue1<<" "<<parameterValue2<<" "<<parameterValue3<<" "<<parameterValue4<<" "<<message<<std::endl;
                 result = handler.Getter(parameterValue1, parameterValue2, parameterValue3, parameterValue4, message);
             }
             else
@@ -188,7 +186,6 @@ public:
     {
         std::string originalParameterName = parameterName;
         std::unordered_map<std::string, ParameterHandler>::const_iterator got = parameterHandlers.find(parameterName);
-        std::cout<<"inside HandleParameter"<<std::endl;
         if ( got == parameterHandlers.end() )
         {
             DAEMON_LOG_ERROR("Handler not found");

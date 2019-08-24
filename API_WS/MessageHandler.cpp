@@ -115,9 +115,6 @@ bool MessageHandler::IsBase64(unsigned char c)
 
 std::vector<unsigned char> MessageHandler::Base64Decode(std::string const& encodedStr)
 {   
-
-    std::cout<<encodedStr<<" encoded string heree 1"<<std::endl;
-
     static const std::string base64_chars = 
                  "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                  "abcdefghijklmnopqrstuvwxyz"

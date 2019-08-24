@@ -155,14 +155,6 @@ void Daemon::ProcessReceivedData(uint8_t* receivedBuffer)
     {   
         auto strParamPacket = req->data.AsStrParamPacket();
         bool result = module->HandleParameter(req->header->command, req->header->parameter, strParamPacket->value1, strParamPacket->value2, req.get()->header->message);
-        
-        //Remove after checking
-        // std::cout<<"types here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<std::endl;
-        // std::cout<<typeid(req.get()->header->message).name()<<std::endl;
-        // std::cout<<typeid(req->header->parameter).name()<<std::endl;
-        // std::cout<<typeid(strParamPacket->value1).name()<<std::endl;
-        // std::cout<<"types here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<std::endl;
-
     }
     else if (union_type == PacketData::BlobPacket)
     {   
